@@ -1,0 +1,29 @@
+*{
+	color: red;
+	tab-size: 2;
+}
+.supported, .main{
+	color: red;
+	background: green;
+	margin-left: 1rem;
+	margin-right: 2rem;
+	font-style: italic;
+	font-weight: bold;
+	text-decoration: underline;
+	text-decoration: line-through;
+	display: none;
+	display: list-item;
+	list-style-type: "- ";
+	animation: blink;
+}
+.supported::before, .main::before{
+	content: "“";
+}
+.supported::before, .main::after{
+	content: "”";
+}
+
+.supported{
+	padding-left: 1rem;
+	padding-right: 2rem;
+}

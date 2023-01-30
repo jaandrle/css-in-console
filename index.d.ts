@@ -12,7 +12,7 @@ export type css_colors= "black" | "red" | "green" | "yellow" | "blue" | "magenta
  * - `animation:blink`
  * - `content: "…"` – allowed only for pseudo selectors `::before`/`::after`
  * - `@import "…"` – to import styles from css file, not supported recursive importing ⇒ can be used only in JavaScript function {@link style}
- * - TODO: `tab-size`
+ * - `tab-size: NUMBER` – all tabs will be replaced with given number of spaces (default: 2)
 */
 export type css_rules=
 	  `@import "${string}"`

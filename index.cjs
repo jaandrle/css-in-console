@@ -164,6 +164,7 @@ function applyNth(candidate = "") {
   const filter = {};
   const margin = { left: "", right: "" };
   const content = { before: "", after: "" };
+  let tab_size = 7;
   const colors = candidate.split(";").reverse().reduce(function(out, rule) {
     if (!rule)
       return out;
@@ -174,6 +175,10 @@ function applyNth(candidate = "") {
     const test = (t) => name.indexOf(t) === 0;
     if (test("padding") || test("margin")) {
       margin[name.split("-")[1].trim()] = " ".repeat(parseInt(value));
+      return out;
+    }
+    if (test("tab-size")) {
+      tab_size = parseInt(value);
       return out;
     }
     if (test("list-style")) {
@@ -192,7 +197,7 @@ function applyNth(candidate = "") {
     return cssAnsiReducer(out, name + ":" + value);
   }, [[], []]);
   return function(match) {
-    return margin.left + `\x1B[${colors[0].join(";")}m` + content.before + match.slice(2) + content.after + `\x1B[${colors[1].join(";")}m` + margin.right;
+    return margin.left + `\x1B[${colors[0].join(";")}m` + content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after + `\x1B[${colors[1].join(";")}m` + margin.right;
   };
 }
 function cssAnsiReducer(curr, c) {
