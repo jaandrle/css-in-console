@@ -1,0 +1,71 @@
+{
+	"name": "terminal-css",
+	"version": "1.0.0",
+	"description": "Naive and simplistic styling of terminal text using “CSS”. Provides `console.log`/… alternatives with partial `%c` support.",
+	"author": "Jan Andrle <andrle.jan@centrum.cz>",
+	"license": "MIT",
+	"homepage": "https://github.com/jaandrle/terminal-css",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jaandrle/terminal-css.git"
+	},
+	"bugs": {
+		"url": "https://github.com/jaandrle/terminal-css/issues"
+	},
+	"scripts": {
+		"build:lint": "npx jshint */*.js --show-non-errors",
+		"build:cjs": "npx esbuild index.js --platform=node --bundle --outfile=index.cjs",
+		"build:doc:typedoc": "npx typedoc index.d.ts --readme none --defaultCategory 'Internal' --categoryOrder 'Public' --categoryOrder 'Internal' --sort visibility --disableSources",
+		"build:doc:sed": "sed -i 's/^terminal-css/[← Back](..) terminal-css/' docs/README.md",
+		"build:doc": "npm run build:doc:typedoc && npm run build:doc:sed",
+		"build": "clear && npm run build:lint && npm run build:cjs && npm run build:doc",
+		"examples": "find examples -iname '*.js' && find examples -iname '*.js' | xargs -I {} node {}"
+	},
+	"keywords": [
+		"cli",
+		"css",
+		"nodejs",
+		"colors"
+	],
+	"type": "module",
+	"main": "index.cjs",
+	"module": "index.js",
+	"types": "index.d.ts",
+	"exports": {
+		".": {
+			"import": "./index.js"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			".": [
+				"./index.d.ts"
+			]
+		}
+	},
+	"files": [
+		"index.js",
+		"index.cjs",
+		"index.d.ts",
+		"src"
+	],
+	"engines": {
+		"node": ">=18"
+	},
+	"jshintConfig": {
+		"esversion": 6,
+		"node": "true",
+		"undef": "true",
+		"latedef": "true",
+		"maxparams": 4,
+		"maxdepth": 3,
+		"maxcomplexity": 10
+	},
+	"devDependencies": {
+		"@types/node": "^18.11.18",
+		"jshint": "^2.13.6",
+		"typedoc": "^0.23.23",
+		"typedoc-plugin-markdown": "^3.14.0",
+		"esbuild": "0.17.5"
+	}
+}
