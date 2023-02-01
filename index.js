@@ -35,6 +35,8 @@ export function style(pieces, ...styles_arr){
 	let all= "";
 	const styles_preprocessed= styles_arr.flatMap(function(style){
 		style= style.trim();
+		if(!style) return [];
+
 		if(style[0]==="@"){
 			if(style.indexOf("@import")!==0) return [];
 			let url= unQuoteSemicol(style.slice(7)).value;

@@ -240,6 +240,8 @@ function style(pieces, ...styles_arr) {
   let all = "";
   const styles_preprocessed = styles_arr.flatMap(function(style2) {
     style2 = style2.trim();
+    if (!style2)
+      return [];
     if (style2[0] === "@") {
       if (style2.indexOf("@import") !== 0)
         return [];

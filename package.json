@@ -1,6 +1,6 @@
 {
 	"name": "css-in-console",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Naive and simplistic styling of terminal text using “CSS”. Provides `console.log`/… alternatives with partial `%c` support.",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
