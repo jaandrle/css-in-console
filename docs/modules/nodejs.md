@@ -1,4 +1,4 @@
-[terminal-css](../README.md) / nodejs
+[css-in-console](../README.md) / nodejs
 
 # Namespace: nodejs
 

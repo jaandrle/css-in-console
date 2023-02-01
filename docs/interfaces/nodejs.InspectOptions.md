@@ -1,4 +1,4 @@
-[terminal-css](../README.md) / [nodejs](../modules/nodejs.md) / InspectOptions
+[css-in-console](../README.md) / [nodejs](../modules/nodejs.md) / InspectOptions
 
 # Interface: InspectOptions
 

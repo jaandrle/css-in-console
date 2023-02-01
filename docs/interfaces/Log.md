@@ -1,4 +1,4 @@
-[terminal-css](../README.md) / Log
+[css-in-console](../README.md) / Log
 
 # Interface: Log
 

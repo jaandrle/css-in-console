@@ -1,6 +1,6 @@
-[← Home](../../..) | terminal-css
+[← Home](../../..) | css-in-console
 
-# terminal-css
+# css-in-console
 
 ## Table of contents
 

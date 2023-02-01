@@ -27,8 +27,8 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // index.js
-var terminal_css_exports = {};
-__export(terminal_css_exports, {
+var css_in_console_exports = {};
+__export(css_in_console_exports, {
   css: () => css,
   default: () => log2,
   error: () => error2,
@@ -37,7 +37,7 @@ __export(terminal_css_exports, {
   log: () => log2,
   style: () => style
 });
-module.exports = __toCommonJS(terminal_css_exports);
+module.exports = __toCommonJS(css_in_console_exports);
 
 // src/utils.js
 function customRule(...rule) {

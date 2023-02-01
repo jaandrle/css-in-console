@@ -1,4 +1,4 @@
-[terminal-css](../README.md) / [nodejs](nodejs.md) / inspect
+[css-in-console](../README.md) / [nodejs](nodejs.md) / inspect
 
 # Namespace: inspect
 
