@@ -24,6 +24,7 @@ For `log`/`error`/`format`/`formatWithOptions` functions, you can use [Styling c
 The exported functions process the CSS (`%c` expression) in the first step and then return to the corresponding native functions:
 - `log`/`error` ⇒ [`console.log`](https://nodejs.org/api/console.html#consolelogdata-args)/[`console.error`](https://nodejs.org/api/console.html#consoleerrordata-args)
 - `format`/`formatWithOptions` ⇒ [`util.format`](https://nodejs.org/api/console.html#consoleerrordata-args)/[`util.formatWithOptions`](https://nodejs.org/api/util.html#utilformatwithoptionsinspectoptions-format-args)
+
 …**Important consequence**: `%c` is processed firstly so indestead of `log("%i%c", 5, "color:red")` you must reorder arguments and so use `log("%i%c", "color:red", 5)`!
 
 You can also use the `style`/`css` or `log.style`/`log.css` helpers to prepare styling rules (they are aliases for the same function).
