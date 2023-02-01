@@ -1,22 +1,22 @@
 {
-	"name": "terminal-css",
-	"version": "1.0.0",
+	"name": "css-in-console",
+	"version": "1.0.1",
 	"description": "Naive and simplistic styling of terminal text using “CSS”. Provides `console.log`/… alternatives with partial `%c` support.",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
-	"homepage": "https://github.com/jaandrle/terminal-css",
+	"homepage": "https://github.com/jaandrle/css-in-console",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/jaandrle/terminal-css.git"
+		"url": "git+https://github.com/jaandrle/css-in-console.git"
 	},
 	"bugs": {
-		"url": "https://github.com/jaandrle/terminal-css/issues"
+		"url": "https://github.com/jaandrle/css-in-console/issues"
 	},
 	"scripts": {
 		"build:lint": "npx jshint */*.js --show-non-errors",
 		"build:cjs": "npx esbuild index.js --platform=node --bundle --outfile=index.cjs",
 		"build:doc:typedoc": "npx typedoc index.d.ts --readme none --defaultCategory 'Internal' --categoryOrder 'Public' --categoryOrder 'Internal' --sort visibility --disableSources",
-		"build:doc:sed": "sed -i 's/^terminal-css/[← Home](..\\/..\\/..) \\| terminal-css/' docs/README.md",
+		"build:doc:sed": "sed -i 's/^css-in-console/[← Home](..\\/..\\/..) \\| css-in-console/' docs/README.md",
 		"build:doc": "npm run build:doc:typedoc && npm run build:doc:sed",
 		"build": "clear && npm run build:lint && npm run build:cjs && npm run build:doc",
 		"examples": "find examples -iname '*.js' && find examples -iname '*.js' | xargs -I {} node {}"

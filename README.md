@@ -1,5 +1,5 @@
 ```js
-import { log, style } from "terminal-css";
+import { log, style } from "css-in-console";
 const css= style`
 	@import "./example.css";
 	.h1{ color: red; }
@@ -17,7 +17,7 @@ log("%cLI (by default %cstarts%c with `- `)",
 	"…you can use `list-style-type` to change it."
 );
 ```
-# terminal-css
+# css-in-console
 This library provides extended alternatives to native functions such as `console.log`/`util.format`/….
 For `log`/`error`/`format`/`formatWithOptions` functions, you can use [Styling console output](https://developer.mozilla.org/en-US/docs/Web/API/console#styling_console_output).
 
