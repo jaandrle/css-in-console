@@ -5,7 +5,9 @@ export function cssLine(style){
 	return name_candidate.split(",").map(name=> {
 		let pseudo;
 		[ name, pseudo ]= name.split(/:?:/).map(v=> v.trim());
-		if(pseudo) css= css.replaceAll("content", customRule("content", pseudo));
+		if(pseudo) css= css
+			.replaceAll(new RegExp(customRule("content")+"-(before|after)", "g"), "content")
+			.replaceAll("content", customRule("content", pseudo));
 		if(css[css.length-1]!==";") css+= ";";
 		return [ name, css ];
 	});
@@ -55,7 +57,7 @@ function applyNth(candidate= ""){
 				return out;
 			}
 			if(test(customRule("content"))){
-				content[name.slice(name.lastIndexOf("-")+1)]+= unQuoteSemicol(value).value;
+				content[name.slice(name.lastIndexOf("-")+1)]+= unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
 				return out;
 			}
 			if(test("display")&&value==="list-item"){
