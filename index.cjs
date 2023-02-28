@@ -130,13 +130,13 @@ function cssLine(style2) {
     let pseudo;
     [name, pseudo] = name.split(/:?:/).map((v) => v.trim());
     if (pseudo)
-      css2 = css2.replaceAll("content", customRule("content", pseudo));
+      css2 = css2.replaceAll(new RegExp(customRule("content") + "-(before|after)", "g"), "content").replaceAll("content", customRule("content", pseudo));
     if (css2[css2.length - 1] !== ";")
       css2 += ";";
     return [name, css2];
   });
 }
-function apply(messages) {
+function apply(messages, { is_colors }) {
   const out = [];
   const c = "%c", cr = new RegExp(`(?<!%)(?=${c})`);
   for (let i = 0, { length } = messages; i < length; i++) {
@@ -150,13 +150,13 @@ function apply(messages) {
       const msj = ms[j];
       if (msj.indexOf(c) !== 0)
         continue;
-      ms[j] = applyNth(messages[++i])(msj);
+      ms[j] = applyNth(messages[++i], { is_colors })(msj);
     }
     out.push(ms.join(""));
   }
   return out;
 }
-function applyNth(candidate = "") {
+function applyNth(candidate, { is_colors }) {
   if (typeof candidate !== "string")
     return (m) => m.slice(2);
   if (candidate.indexOf(":") === -1)
@@ -186,7 +186,7 @@ function applyNth(candidate = "") {
       return out;
     }
     if (test(customRule("content"))) {
-      content[name.slice(name.lastIndexOf("-") + 1)] += unQuoteSemicol(value).value;
+      content[name.slice(name.lastIndexOf("-") + 1)] += unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
       return out;
     }
     if (test("display") && value === "list-item") {
@@ -194,10 +194,15 @@ function applyNth(candidate = "") {
         content.before = "- " + content.before;
       return out;
     }
+    if (!is_colors)
+      return out;
     return cssAnsiReducer(out, name + ":" + value);
   }, [[], []]);
   return function(match) {
-    return margin.left + `\x1B[${colors[0].join(";")}m` + content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after + `\x1B[${colors[1].join(";")}m` + margin.right;
+    let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
+    if (colors.length)
+      out = `\x1B[${colors[0].join(";")}m` + out + `\x1B[${colors[1].join(";")}m`;
+    return margin.left + out + margin.right;
   };
 }
 function cssAnsiReducer(curr, c) {
@@ -217,9 +222,8 @@ function format(...messages) {
   return formatWithOptions({}, ...messages);
 }
 function formatWithOptions(options, ...messages) {
-  const { colors = true } = options || {};
-  if (colors)
-    messages = apply(messages);
+  const { colors: is_colors = true } = options || {};
+  messages = apply(messages, { is_colors });
   return (0, import_node_util2.formatWithOptions)(options, ...messages);
 }
 var css = style;

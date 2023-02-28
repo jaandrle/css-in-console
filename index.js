@@ -6,8 +6,8 @@ export function format(...messages){
 	return formatWithOptions({}, ...messages);
 }
 export function formatWithOptions(options, ...messages){
-	const { colors= true }= options || {};
-	if(colors) messages= apply(messages);
+	const { colors: is_colors= true }= options || {};
+	messages= apply(messages, { is_colors });
 	return formatWithOptionsNative(options, ...messages);
 }
 
