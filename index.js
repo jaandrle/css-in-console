@@ -33,11 +33,32 @@ export function style(pieces, ...styles_arr){
 		styles_arr.unshift(pieces);
 	const out= { unset: "unset:all" };
 	let all= "";
+	let skip= false;
 	const styles_preprocessed= styles_arr.flatMap(function(style){
 		style= style.trim();
 		if(!style) return [];
 
+		if(style==="}"){
+			skip= false;
+			return [];
+		}
+		if(skip)
+			return [];
 		if(style[0]==="@"){
+			if(style.indexOf("@supports")===0){
+				skip= true;
+				const idx_slice= style.indexOf("{");
+				const condition= style.slice(0, idx_slice).replaceAll(/\s/g, "");
+				const is_not= condition.indexOf("not")===9;
+				const is_colors= condition.indexOf("color:", 9)===13 || condition.indexOf("background", 9)===13;
+				if(!is_colors) return [];
+				const curr= usesColors("stdout");
+				console.log({ is_not, curr });
+				if(is_not&&curr || !is_not&&!curr)
+					return [];
+				skip= false;
+				return cssLine(style.slice(idx_slice+1));
+			}
 			if(style.indexOf("@import")!==0) return [];
 			let url= unQuoteSemicol(style.slice(7)).value;
 			if(url[0]===".") url= resolve(process.argv[1], "..", url);
@@ -50,6 +71,7 @@ export function style(pieces, ...styles_arr){
 		}
 		return cssLine(style);
 	});
+	console.log(styles_preprocessed);
 	for(const [ name, css ] of styles_preprocessed){
 		if(name==="*"){
 			all+= css;

@@ -242,11 +242,33 @@ function style(pieces, ...styles_arr) {
     styles_arr.unshift(pieces);
   const out = { unset: "unset:all" };
   let all = "";
+  let skip = false;
   const styles_preprocessed = styles_arr.flatMap(function(style2) {
     style2 = style2.trim();
     if (!style2)
       return [];
+    if (style2 === "}") {
+      skip = false;
+      return [];
+    }
+    if (skip)
+      return [];
     if (style2[0] === "@") {
+      if (style2.indexOf("@supports") === 0) {
+        skip = true;
+        const idx_slice = style2.indexOf("{");
+        const condition = style2.slice(0, idx_slice).replaceAll(/\s/g, "");
+        const is_not = condition.indexOf("not") === 9;
+        const is_colors = condition.indexOf("color:", 9) === 13 || condition.indexOf("background", 9) === 13;
+        if (!is_colors)
+          return [];
+        const curr = usesColors("stdout");
+        console.log({ is_not, curr });
+        if (is_not && curr || !is_not && !curr)
+          return [];
+        skip = false;
+        return cssLine(style2.slice(idx_slice + 1));
+      }
       if (style2.indexOf("@import") !== 0)
         return [];
       let url = unQuoteSemicol(style2.slice(7)).value;
@@ -260,6 +282,7 @@ function style(pieces, ...styles_arr) {
     }
     return cssLine(style2);
   });
+  console.log(styles_preprocessed);
   for (const [name, css2] of styles_preprocessed) {
     if (name === "*") {
       all += css2;

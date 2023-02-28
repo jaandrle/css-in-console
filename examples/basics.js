@@ -5,7 +5,16 @@ const css= log.css`
 	.p{}
 	.li{ display: list-item; margin-left: 2rem; }
 	.tab{ tab-size: 4; }
+	@supports not (color: red){
+		.headline::before, .tab::before {
+			content: "\`";
+		}
+		.headline::after, .tab::after {
+			content: "\`";
+		}
+	}
 `;
+log(css);
 log("%cSimple stylings", css.headline);
 log("%cExample shows:", css.p);
 log("%cusing `margin-left`", css.li);
