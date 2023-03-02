@@ -45,12 +45,12 @@ export function style(pieces, ...styles_arr){
 		if(skip)
 			return [];
 		if(style[0]==="@"){
-			if(style.indexOf("@supports")===0){
+			if(style.indexOf("@media")===0){
 				skip= true;
 				const idx_slice= style.indexOf("{");
 				const condition= style.slice(0, idx_slice).replaceAll(/\s/g, "");
-				const is_not= condition.indexOf("not")===9;
-				const is_colors= condition.indexOf("color:", 9)===13 || condition.indexOf("background", 9)===13;
+				const is_not= condition.indexOf("not")===6;
+				const is_colors= condition.indexOf("color", 6)===10;
 				if(!is_colors) return [];
 				const curr= usesColors("stdout");
 				console.log({ is_not, curr });

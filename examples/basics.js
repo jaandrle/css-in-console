@@ -5,7 +5,7 @@ const css= log.css`
 	.p{}
 	.li{ display: list-item; margin-left: 2rem; }
 	.tab{ tab-size: 4; }
-	@supports not (color: red){
+	@media not (color){
 		.headline::before, .tab::before {
 			content: "\`";
 		}
