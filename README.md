@@ -47,6 +47,7 @@ For more information see:
 
 ## Options under consideration for next release(s)
 - support (some) functions/keywords for `content`/`list-style-type` (+ add custom such as ‘timestamp’/‘date’/‘time’)
+- `@media … (color) …`?
 - `width`/`text-overflow`/`white-space`
 - `display:block` ⇒ append "\n"?
 - `text-align`
