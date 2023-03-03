@@ -12,7 +12,7 @@ export function cssLine(style){
 		return [ name, css ];
 	});
 }
-export function apply(messages){
+export function apply(messages, { is_colors }){
 	const out= [];
 	const c= "%c", cr= new RegExp(`(?<!%)(?=${c})`);
 	for(let i=0, { length }= messages; i<length; i++){
@@ -22,14 +22,14 @@ export function apply(messages){
 		for(let j=0, { length: jl }= ms; j<jl; j++){
 			const msj= ms[j];
 			if(msj.indexOf(c)!==0) continue;
-			ms[j]= applyNth(messages[++i])(msj);
+			ms[j]= applyNth(messages[++i], { is_colors })(msj);
 		}
 		out.push(ms.join(""));
 	}
 	return out;
 }
 
-function applyNth(candidate= ""){
+function applyNth(candidate, { is_colors }){
 	if(typeof candidate !== "string") return m=> m.slice(2);
 	if(candidate.indexOf(":")===-1) return m=> m.slice(2);
 	const filter= {};
@@ -65,16 +65,21 @@ function applyNth(candidate= ""){
 					content.before= "- " + content.before;
 				return out;
 			}
+			if(!is_colors)
+				return out;
 			return cssAnsiReducer(out, name+":"+value);
 		}, [ [], [] ]);
 	return function(match){
-		return margin.left +
-			`\x1B[${colors[0].join(';')}m` +
+		let out= 
 			content.before +
 			match.slice(2).replaceAll("\t", " ".repeat(tab_size)) +
-			content.after +
-			`\x1B[${colors[1].join(';')}m` +
-			margin.right;
+			content.after;
+		if(colors.length)
+			out=
+				`\x1B[${colors[0].join(';')}m` +
+				out +
+				`\x1B[${colors[1].join(';')}m`;
+		return margin.left + out + margin.right;
 	};
 }
 import { ansi_constants } from "./ansi_constants.js";

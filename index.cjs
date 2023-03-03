@@ -1,8 +1,6 @@
-var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
 var __export = (target, all) => {
   for (var name in all)
@@ -16,25 +14,17 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // index.js
 var css_in_console_exports = {};
 __export(css_in_console_exports, {
   css: () => css,
-  default: () => log2,
-  error: () => error2,
+  default: () => log,
+  error: () => error,
   format: () => format,
   formatWithOptions: () => formatWithOptions,
-  log: () => log2,
+  log: () => log,
   style: () => style
 });
 module.exports = __toCommonJS(css_in_console_exports);
@@ -130,13 +120,13 @@ function cssLine(style2) {
     let pseudo;
     [name, pseudo] = name.split(/:?:/).map((v) => v.trim());
     if (pseudo)
-      css2 = css2.replaceAll("content", customRule("content", pseudo));
+      css2 = css2.replaceAll(new RegExp(customRule("content") + "-(before|after)", "g"), "content").replaceAll("content", customRule("content", pseudo));
     if (css2[css2.length - 1] !== ";")
       css2 += ";";
     return [name, css2];
   });
 }
-function apply(messages) {
+function apply(messages, { is_colors }) {
   const out = [];
   const c = "%c", cr = new RegExp(`(?<!%)(?=${c})`);
   for (let i = 0, { length } = messages; i < length; i++) {
@@ -150,13 +140,13 @@ function apply(messages) {
       const msj = ms[j];
       if (msj.indexOf(c) !== 0)
         continue;
-      ms[j] = applyNth(messages[++i])(msj);
+      ms[j] = applyNth(messages[++i], { is_colors })(msj);
     }
     out.push(ms.join(""));
   }
   return out;
 }
-function applyNth(candidate = "") {
+function applyNth(candidate, { is_colors }) {
   if (typeof candidate !== "string")
     return (m) => m.slice(2);
   if (candidate.indexOf(":") === -1)
@@ -186,7 +176,7 @@ function applyNth(candidate = "") {
       return out;
     }
     if (test(customRule("content"))) {
-      content[name.slice(name.lastIndexOf("-") + 1)] += unQuoteSemicol(value).value;
+      content[name.slice(name.lastIndexOf("-") + 1)] += unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
       return out;
     }
     if (test("display") && value === "list-item") {
@@ -194,10 +184,15 @@ function applyNth(candidate = "") {
         content.before = "- " + content.before;
       return out;
     }
+    if (!is_colors)
+      return out;
     return cssAnsiReducer(out, name + ":" + value);
   }, [[], []]);
   return function(match) {
-    return margin.left + `\x1B[${colors[0].join(";")}m` + content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after + `\x1B[${colors[1].join(";")}m` + margin.right;
+    let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
+    if (colors.length)
+      out = `\x1B[${colors[0].join(";")}m` + out + `\x1B[${colors[1].join(";")}m`;
+    return margin.left + out + margin.right;
   };
 }
 function cssAnsiReducer(curr, c) {
@@ -209,28 +204,27 @@ function cssAnsiReducer(curr, c) {
 
 // index.js
 var import_node_util2 = require("node:util");
-var console = __toESM(require("node:console"), 1);
-var process2 = __toESM(require("node:process"), 1);
+var import_node_console = require("node:console");
+var import_node_process = require("node:process");
 var import_node_fs = require("node:fs");
 var import_node_path = require("node:path");
 function format(...messages) {
   return formatWithOptions({}, ...messages);
 }
 function formatWithOptions(options, ...messages) {
-  const { colors = true } = options || {};
-  if (colors)
-    messages = apply(messages);
+  const { colors: is_colors = true } = options || {};
+  messages = apply(messages, { is_colors });
   return (0, import_node_util2.formatWithOptions)(options, ...messages);
 }
 var css = style;
-function log2(...messages) {
-  return console.log(formatWithOptions({ colors: usesColors("stdout") }, ...messages));
+function log(...messages) {
+  return (0, import_node_console.log)(formatWithOptions({ colors: usesColors("stdout") }, ...messages));
 }
-Object.assign(log2, { style, css });
-function error2(...messages) {
-  return console.error(formatWithOptions({ colors: usesColors("stderr") }, ...messages));
+Object.assign(log, { style, css });
+function error(...messages) {
+  return (0, import_node_console.error)(formatWithOptions({ colors: usesColors("stderr") }, ...messages));
 }
-Object.assign(error2, { style, css });
+Object.assign(error, { style, css });
 function style(pieces, ...styles_arr) {
   if (Array.isArray(pieces))
     styles_arr = CSStoLines(String.raw(pieces, styles_arr));
@@ -247,11 +241,11 @@ function style(pieces, ...styles_arr) {
         return [];
       let url = unQuoteSemicol(style2.slice(7)).value;
       if (url[0] === ".")
-        url = (0, import_node_path.resolve)(process2.argv[1], "..", url);
+        url = (0, import_node_path.resolve)(import_node_process.argv[1], "..", url);
       try {
         return CSStoLines((0, import_node_fs.readFileSync)(url, { encoding: "utf-8" }).toString()).flatMap(cssLine);
-      } catch (error3) {
-        throw new Error(`Unable to import file ${url}: ${error3.message}`);
+      } catch (error2) {
+        throw new Error(`Unable to import file ${url}: ${error2.message}`);
       }
     }
     return cssLine(style2);

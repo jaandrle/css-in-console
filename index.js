@@ -6,21 +6,21 @@ export function format(...messages){
 	return formatWithOptions({}, ...messages);
 }
 export function formatWithOptions(options, ...messages){
-	const { colors= true }= options || {};
-	if(colors) messages= apply(messages);
+	const { colors: is_colors= true }= options || {};
+	messages= apply(messages, { is_colors });
 	return formatWithOptionsNative(options, ...messages);
 }
 
 export const css= style;
-import * as console from "node:console";
-import * as process from 'node:process';
+import { log as cLog, error as cError } from "node:console";
+import { argv } from 'node:process';
 export default function log(...messages){
-	return console.log(formatWithOptions({ colors: usesColors("stdout") },...messages));
+	return cLog(formatWithOptions({ colors: usesColors("stdout") },...messages));
 }
 Object.assign(log, { style, css });
 export { log };
 export function error(...messages){
-	return console.error(formatWithOptions({ colors: usesColors("stderr") },...messages));
+	return cError(formatWithOptions({ colors: usesColors("stderr") },...messages));
 }
 Object.assign(error, { style, css });
 
@@ -40,7 +40,7 @@ export function style(pieces, ...styles_arr){
 		if(style[0]==="@"){
 			if(style.indexOf("@import")!==0) return [];
 			let url= unQuoteSemicol(style.slice(7)).value;
-			if(url[0]===".") url= resolve(process.argv[1], "..", url);
+			if(url[0]===".") url= resolve(argv[1], "..", url);
 			try{
 				return CSStoLines(readFileSync(url, { encoding: "utf-8" }).toString())
 					.flatMap(cssLine);
