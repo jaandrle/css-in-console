@@ -29,6 +29,7 @@ export function apply(messages, { is_colors }){
 	return out;
 }
 
+import * as counters from "./counters.js";
 function applyNth(candidate, { is_colors }){
 	if(typeof candidate !== "string") return m=> m.slice(2);
 	if(candidate.indexOf(":")===-1) return m=> m.slice(2);
@@ -53,7 +54,11 @@ function applyNth(candidate, { is_colors }){
 				return out;
 			}
 			if(test("list-style")){
-				content.before= unQuoteSemicol(value).value + content.before;
+				const { has_quotes, value: style_name }= unQuoteSemicol(value);
+				if(has_quotes)
+					content.before= style_name + content.before;
+				else if(counters.has(style_name))
+					content.before= counters.get(style_name) + content.before;
 				return out;
 			}
 			if(test(customRule("content"))){
