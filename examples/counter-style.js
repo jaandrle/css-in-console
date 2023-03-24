@@ -1,12 +1,12 @@
 import { log } from '../index.js';
 const css= log.css`
 	@counter-style time{
-		system: extends --terminal-time;
+		system: extends decimal;
 		suffix: ") ";
 		prefix: "(";
-		--terminal-mask: "01" "11111111";
+		pad: 3 "0";
 	}
-	.li{ display: list-item; list-style: decimal; }
+	.li{ display: list-item; list-style: time; }
 `;
 log("%cusing custom list style", css.li);
 log("%cusing custom list style", css.li);

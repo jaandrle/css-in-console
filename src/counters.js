@@ -31,7 +31,7 @@ function loadInit(){
 	JSON.parse(init).forEach(([ key, value ])=> store.set(key, value));
 	init= false;
 }
-function getSymbol({ system, symbols, current, suffix= "", prefix= "", mask }){
+function getSymbol({ pad, system, symbols, current, suffix= "", prefix= "", mask }){
 	let s= "";
 	switch(system){
 		case "fixed":
@@ -48,6 +48,12 @@ function getSymbol({ system, symbols, current, suffix= "", prefix= "", mask }){
 			s= applyMask(datetime().split("T")[0], mask); break;
 		case "--terminal-time":
 			s= applyMask(datetime().split("T")[1], mask); break;
+	}
+	if(typeof pad!=="undefined"){
+		const i_space= pad.indexOf(" ");
+		const num= pad.slice(0, i_space);
+		const chars= pad.slice(i_space + 2, -1);
+		s= s.padStart(Number(num), chars);
 	}
 	return prefix+s+suffix;
 }
