@@ -36,6 +36,7 @@ function applyNth(candidate, { is_colors }){
 	const filter= {};
 	const margin= { left: "", right: "" };
 	const content= { before: "", after: "" };
+	const content_todo= [];
 	let tab_size= 7;
 	const colors= candidate.split(";")
 		.reverse().reduce(function(out, rule){
@@ -61,8 +62,22 @@ function applyNth(candidate, { is_colors }){
 					content.before= counters.get(style_name) + content.before;
 				return out;
 			}
+			if(test("counter-reset")){
+				const [c, v]= value.split(" ");
+				counters.counterReset(c, Number(v));
+				return out;
+			}
+			if(test("counter-increment")){
+				const [c, v]= value.split(" ");
+				content_todo.unshift(()=> counters.counterIncrement(c, Number(v)));
+				return out;
+			}
 			if(test(customRule("content"))){
-				content[name.slice(name.lastIndexOf("-")+1)]+= unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
+				content_todo.push(()=> content[name.slice(name.lastIndexOf("-")+1)]+=
+					Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
+						.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
+						.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
+						.join(""));
 				return out;
 			}
 			if(test("display")&&value==="list-item"){
@@ -74,6 +89,7 @@ function applyNth(candidate, { is_colors }){
 				return out;
 			return cssAnsiReducer(out, name+":"+value);
 		}, [ [], [] ]);
+	content_todo.forEach(f=> f());
 	return function(match){
 		let out= 
 			content.before +
