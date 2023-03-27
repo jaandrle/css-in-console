@@ -60,6 +60,106 @@ function ruleCrean(rule) {
   return [name.trim(), value.join(":").trim()];
 }
 
+// src/counters.js
+var store = /* @__PURE__ */ new Map();
+var init = '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["--terminal-datetime",{"system":"--terminal-datetime","suffix":" "}],["--terminal-date",{"system":"--terminal-date","suffix":" "}],["--terminal-time",{"system":"--terminal-time","suffix":" "}]]';
+function register(style2) {
+  loadInit();
+  const name = style2.slice(style2.indexOf(" "), style2.indexOf("{")).trim();
+  const candidate = cssStringToObject(style2);
+  if (!candidate.system.startsWith("extends"))
+    return store.set(name, candidate);
+  const system = store.get(candidate.system.split(" ")[1]);
+  if (system)
+    store.set(name, Object.assign({}, system, candidate, { system: system.system }));
+}
+function has(name) {
+  loadInit();
+  return store.has(name);
+}
+function get(name) {
+  loadInit();
+  const curr = store.get(name);
+  if (!Reflect.has(curr, "current"))
+    curr.current = 1;
+  else
+    curr.current += 1;
+  return getSymbol(curr);
+}
+function loadInit() {
+  if (!init)
+    return;
+  JSON.parse(init).forEach(([key, value]) => store.set(key, value));
+  init = false;
+}
+function getSymbol({ pad, system, symbols, current, suffix = "", prefix = "", mask }) {
+  let s2 = "";
+  switch (system) {
+    case "fixed":
+      s2 = symbols[current - 1];
+      if (typeof s2 === "undefined")
+        s2 = current;
+      break;
+    case "cyclic":
+      s2 = symbols[(current - 1) % symbols.length];
+      break;
+    case "numeric":
+      s2 = current.toString(symbols.length).split("").map((n) => symbols[n]).join("");
+      break;
+    case "alphabetic":
+      s2 = current.toString(symbols.length).split("").map((n, i) => symbols[n - Number(!i)]).join("");
+      break;
+    case "--terminal-datetime":
+      s2 = applyMask(datetime(), mask);
+      break;
+    case "--terminal-date":
+      s2 = applyMask(datetime().split("T")[0], mask);
+      break;
+    case "--terminal-time":
+      s2 = applyMask(datetime().split("T")[1], mask);
+      break;
+  }
+  if (typeof pad !== "undefined") {
+    const i_space = pad.indexOf(" ");
+    const num = pad.slice(0, i_space);
+    const chars = pad.slice(i_space + 2, -1);
+    s2 = s2.padStart(Number(num), chars);
+  }
+  return prefix + s2 + suffix;
+}
+function applyMask(value, mask) {
+  if (typeof mask === "undefined")
+    return value;
+  const [symbols, m] = mask.split(" ").map((v) => v.slice(1, -1));
+  return value.split("").reduce(function(acc, curr, i) {
+    const mi = m[i] || "";
+    if (mi === symbols[0])
+      return acc;
+    return acc + (mi === symbols[1] ? curr : mi);
+  }, "");
+}
+function datetime() {
+  return (/* @__PURE__ */ new Date()).toISOString().split("Z")[0];
+}
+var quotes_strip = ["suffix", "prefix"];
+function cssStringToObject(css_str) {
+  const css_body = css_str.slice(css_str.indexOf("{") + 1, css_str.lastIndexOf("}"));
+  return css_body.split(";").reduce((out, curr) => {
+    let [key, ...value] = curr.split(":");
+    if (!value.length)
+      return out;
+    [key, value] = [key, value.join(":")].map((s2) => s2.trim());
+    if (quotes_strip.includes(key))
+      value = value.slice(1, -1);
+    else if ("symbols" === key)
+      value = value.replaceAll(/["']/g, "").split(" ");
+    else if ("--terminal-mask" === key)
+      key = "mask";
+    Reflect.set(out, key, value);
+    return out;
+  }, {});
+}
+
 // src/ansi_constants.js
 var import_node_util = require("node:util");
 var s = import_node_util.inspect.colors;
@@ -172,7 +272,11 @@ function applyNth(candidate, { is_colors }) {
       return out;
     }
     if (test("list-style")) {
-      content.before = unQuoteSemicol(value).value + content.before;
+      const { has_quotes, value: style_name } = unQuoteSemicol(value);
+      if (has_quotes)
+        content.before = style_name + content.before;
+      else if (has(style_name))
+        content.before = get(style_name) + content.before;
       return out;
     }
     if (test(customRule("content"))) {
@@ -237,8 +341,11 @@ function style(pieces, ...styles_arr) {
     if (!style2)
       return [];
     if (style2[0] === "@") {
-      if (style2.indexOf("@import") !== 0)
+      if (style2.indexOf("@import") !== 0) {
+        if (style2.indexOf("@counter-style") === 0)
+          register(style2);
         return [];
+      }
       let url = unQuoteSemicol(style2.slice(7)).value;
       if (url[0] === ".")
         url = (0, import_node_path.resolve)(import_node_process.argv[1], "..", url);

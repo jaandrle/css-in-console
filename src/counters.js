@@ -1,5 +1,9 @@
+/* 
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/@counter-style
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/counter
+ * */
 const store= new Map();
-let init= '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["--terminal-datetime",{"system":"--terminal-datetime","suffix":" "}],["--terminal-date",{"system":"--terminal-date","suffix":" "}],["--terminal-time",{"system":"--terminal-time","suffix":" "}]]'
+let init= '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["--terminal-datetime",{"system":"--terminal-datetime","suffix":" "}],["--terminal-date",{"system":"--terminal-date","suffix":" "}],["--terminal-time",{"system":"--terminal-time","suffix":" "}]]';
 
 export function register(style){
 	loadInit();
@@ -35,7 +39,7 @@ function getSymbol({ pad, system, symbols, current, suffix= "", prefix= "", mask
 	let s= "";
 	switch(system){
 		case "fixed":
-			s= symbols[current-1] ?? current; break;
+			s= symbols[current-1]; if(typeof s==="undefined") s= current; break;
 		case "cyclic":
 			s= symbols[( current - 1 )%symbols.length]; break;
 		case "numeric":
@@ -61,7 +65,7 @@ function applyMask(value, mask){
 	if(typeof mask==="undefined") return value;
 	const [ symbols, m ]= mask.split(" ").map(v=> v.slice(1, -1));
 	return value.split("").reduce(function(acc, curr, i){
-		const mi= m[i] ?? "";
+		const mi= m[i] || "";
 		if(mi===symbols[0]) return acc;
 		return acc+( mi===symbols[1] ? curr : mi );
 	}, "");
