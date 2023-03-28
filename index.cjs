@@ -61,38 +61,56 @@ function ruleCrean(rule) {
 }
 
 // src/counters.js
-var store = /* @__PURE__ */ new Map();
-var init = '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["--terminal-datetime",{"system":"--terminal-datetime","suffix":" "}],["--terminal-date",{"system":"--terminal-date","suffix":" "}],["--terminal-time",{"system":"--terminal-time","suffix":" "}]]';
+var [system_dt, system_d, system_t] = ["datetime", "date", "time"].map((v) => customRule(v));
+var store_styles = /* @__PURE__ */ new Map();
+var init = '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["' + system_dt + '",{"system":"' + system_dt + '","suffix":" "}],["' + system_d + '",{"system":"' + system_d + '","suffix":" "}],["' + system_t + '",{"system":"' + system_t + '","suffix":" "}]]';
 function register(style2) {
   loadInit();
   const name = style2.slice(style2.indexOf(" "), style2.indexOf("{")).trim();
   const candidate = cssStringToObject(style2);
   if (!candidate.system.startsWith("extends"))
-    return store.set(name, candidate);
-  const system = store.get(candidate.system.split(" ")[1]);
+    return store_styles.set(name, candidate);
+  const system = store_styles.get(candidate.system.split(" ")[1]);
   if (system)
-    store.set(name, Object.assign({}, system, candidate, { system: system.system }));
+    store_styles.set(name, Object.assign({}, system, candidate, { system: system.system }));
 }
 function has(name) {
   loadInit();
-  return store.has(name);
+  return store_styles.has(name);
 }
 function get(name) {
   loadInit();
-  const curr = store.get(name);
-  if (!Reflect.has(curr, "current"))
-    curr.current = 1;
-  else
-    curr.current += 1;
-  return getSymbol(curr);
+  const curr = store_styles.get(name);
+  let { current = 0 } = curr;
+  curr.current = current + 1;
+  return getSymbol(curr, curr);
+}
+var store_counters = /* @__PURE__ */ new Map();
+function counterReset(c, value) {
+  store_counters.set(c, value);
+}
+function counterIncrement(c, increase) {
+  const current = store_counters.get(c) || 0;
+  if (Number.isNaN(increase))
+    increase = 1;
+  store_counters.set(c, current + increase);
+}
+function counterFunction(c, name) {
+  if (!name)
+    name = "decimal";
+  loadInit();
+  const current = store_counters.get(c) || 0;
+  if (!store_styles.has(name))
+    return "";
+  return getSymbol(store_styles.get(name), { suffix: "", prefix: "", current });
 }
 function loadInit() {
   if (!init)
     return;
-  JSON.parse(init).forEach(([key, value]) => store.set(key, value));
+  JSON.parse(init).forEach(([key, value]) => store_styles.set(key, value));
   init = false;
 }
-function getSymbol({ pad, system, symbols, current, suffix = "", prefix = "", mask }) {
+function getSymbol({ pad, system, symbols, negative, mask }, { current, suffix = "", prefix = "" }) {
   let s2 = "";
   switch (system) {
     case "fixed":
@@ -101,7 +119,7 @@ function getSymbol({ pad, system, symbols, current, suffix = "", prefix = "", ma
         s2 = current;
       break;
     case "cyclic":
-      s2 = symbols[(current - 1) % symbols.length];
+      s2 = symbols.at((current - 1) % symbols.length);
       break;
     case "numeric":
       s2 = current.toString(symbols.length).split("").map((n) => symbols[n]).join("");
@@ -109,15 +127,22 @@ function getSymbol({ pad, system, symbols, current, suffix = "", prefix = "", ma
     case "alphabetic":
       s2 = current.toString(symbols.length).split("").map((n, i) => symbols[n - Number(!i)]).join("");
       break;
-    case "--terminal-datetime":
+    case system_dt:
       s2 = applyMask(datetime(), mask);
       break;
-    case "--terminal-date":
+    case system_d:
       s2 = applyMask(datetime().split("T")[0], mask);
       break;
-    case "--terminal-time":
+    case system_t:
       s2 = applyMask(datetime().split("T")[1], mask);
       break;
+  }
+  if (current < 0) {
+    negative = (negative || '"-"').trim();
+    const [q] = negative;
+    const lastIndexOfq = negative.indexOf(q, 1);
+    const [pre, suf] = [negative.slice(0, lastIndexOfq + 1), negative.slice(lastIndexOfq + 1) || '""'].map((s3) => s3.trim().slice(1, -1));
+    s2 = pre + s2 + suf;
   }
   if (typeof pad !== "undefined") {
     const i_space = pad.indexOf(" ");
@@ -153,7 +178,7 @@ function cssStringToObject(css_str) {
       value = value.slice(1, -1);
     else if ("symbols" === key)
       value = value.replaceAll(/["']/g, "").split(" ");
-    else if ("--terminal-mask" === key)
+    else if (customRule("mask") === key)
       key = "mask";
     Reflect.set(out, key, value);
     return out;
@@ -254,6 +279,7 @@ function applyNth(candidate, { is_colors }) {
   const filter = {};
   const margin = { left: "", right: "" };
   const content = { before: "", after: "" };
+  const content_todo = [];
   let tab_size = 7;
   const colors = candidate.split(";").reverse().reduce(function(out, rule) {
     if (!rule)
@@ -279,8 +305,18 @@ function applyNth(candidate, { is_colors }) {
         content.before = get(style_name) + content.before;
       return out;
     }
+    if (test("counter-reset")) {
+      const [c, v] = value.split(" ");
+      counterReset(c, Number(v));
+      return out;
+    }
+    if (test("counter-increment")) {
+      const [c, v] = value.split(" ");
+      content_todo.unshift(() => counterIncrement(c, Number(v)));
+      return out;
+    }
     if (test(customRule("content"))) {
-      content[name.slice(name.lastIndexOf("-") + 1)] += unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
+      content_todo.push(() => content[name.slice(name.lastIndexOf("-") + 1)] += Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\").matchAll(new RegExp(`((['"])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|counter\\((?<c>[^,\\)]*),? ?(?<cs>[^\\)]*)\\))`, "g"))).map(({ groups: { q, c, cs } }) => typeof q === "undefined" ? counterFunction(c, cs) : q).join(""));
       return out;
     }
     if (test("display") && value === "list-item") {
@@ -292,6 +328,7 @@ function applyNth(candidate, { is_colors }) {
       return out;
     return cssAnsiReducer(out, name + ":" + value);
   }, [[], []]);
+  content_todo.forEach((f) => f());
   return function(match) {
     let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
     if (colors.length)
