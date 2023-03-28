@@ -13,7 +13,7 @@
 		"url": "https://github.com/jaandrle/css-in-console/issues"
 	},
 	"scripts": {
-		"lint": "npx jshint */*.js --show-non-errors & size-limit",
+		"lint": "npx jshint */*.js --show-non-errors && size-limit",
 		"build:cjs": "npx esbuild index.js --platform=node --bundle --outfile=index.cjs",
 		"build:doc:typedoc": "npx typedoc index.d.ts --readme none --defaultCategory 'Internal' --categoryOrder 'Public' --categoryOrder 'Internal' --sort visibility --disableSources",
 		"build:doc:sed": "sed -i 's/^css-in-console/[← Home](..\\/..\\/..) \\| css-in-console/' docs/README.md",
