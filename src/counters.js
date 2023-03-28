@@ -74,23 +74,18 @@ function getSymbol({ pad, system, symbols, negative, mask }, { current, suffix= 
 			s= applyMask(datetime().split("T")[1], mask); break;
 	}
 	if(current<0){
-		negative= ( negative || '"-"' ).trim();
-		const [ q ]= negative;
-		const lastIndexOfq= negative.indexOf(q, 1);
-		const [ pre, suf ]= [ negative.slice(0, lastIndexOfq+1), negative.slice(lastIndexOfq+1) || '""' ].map(s=> s.trim().slice(1, -1));
+		const [ pre, suf= "" ]=( negative || [ "-" ] );
 		s= pre + s + suf;
 	}
 	if(typeof pad!=="undefined"){
-		const i_space= pad.indexOf(" ");
-		const num= pad.slice(0, i_space);
-		const chars= pad.slice(i_space + 2, -1);
+		const [ num, chars ]= pad;
 		s= s.padStart(Number(num), chars);
 	}
 	return prefix+s+suffix;
 }
 function applyMask(value, mask){
 	if(typeof mask==="undefined") return value;
-	const [ symbols, m ]= mask.split(" ").map(v=> v.slice(1, -1));
+	const [ symbols, m ]= mask;
 	return value.split("").reduce(function(acc, curr, i){
 		const mi= m[i] || "";
 		if(mi===symbols[0]) return acc;
@@ -99,17 +94,19 @@ function applyMask(value, mask){
 }
 function datetime(){ return (new Date()).toISOString().split("Z")[0]; }
 
-const quotes_strip= [ "suffix", "prefix" ];
+const only_string= [ "suffix", "prefix" ];
 function cssStringToObject(css_str){
 	const css_body= css_str.slice(css_str.indexOf('{')+1, css_str.lastIndexOf('}'));
 	return css_body.split(';').reduce(( out, curr ) => {
 		let [ key, ...value ]= curr.split(':');
 		if(!value.length) return out;
 		[ key, value ]= [ key, value.join(':') ].map(s=> s.trim());
-		if(quotes_strip.includes(key))
-			value= value.slice(1, -1);
-		else if("symbols"===key)
-			value= value.replaceAll(/["']/g, "").split(" ");
+		
+		if("system"!==key)
+			value= Array.from(value.matchAll(/((["'])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|(?<l>\S))/g))
+				.map(({ groups: { q, l } })=> typeof q==="undefined"? l : q.replace(/\\(?!\\)/g, ""));
+		if(only_string.includes(key))
+			value= value.join("");
 		else if(customRule("mask")===key)
 			key= "mask";
 		Reflect.set(out, key, value);

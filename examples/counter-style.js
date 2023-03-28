@@ -7,7 +7,7 @@ const css= log.css`
 		suffix: ". ";
 		pad: 2 " ";
 	}
-	.li{ display: list-item; list-style: num; counter-reset: i -1; }
+	.li{ display: list-item; list-style: num; counter-reset: i -11; }
 
 	@counter-style spin{
 		system: cyclic;
@@ -36,7 +36,7 @@ log("%cCustom list style example.", css.li);
 log("%cCustom list style example.", css.li);
 log("%cCustom list style example.", css.li);
 log("%cCustom list style example.", css.li);
-log("%cCustom list style example. It also resets `counter(i)` to zero.", css.li);
+log("%cCustom list style example. It also resets `counter(i)` to minus ten.", css.li);
 log("");
 log("%cThis uses `counter(i)` in `content` (`::before`).", css.before);
 log("%cThis uses `counter(i)` in `content` (`::before`).", css.before);
