@@ -60,6 +60,131 @@ function ruleCrean(rule) {
   return [name.trim(), value.join(":").trim()];
 }
 
+// src/counters.js
+var [system_dt, system_d, system_t] = ["datetime", "date", "time"].map((v) => customRule(v));
+var store_styles = /* @__PURE__ */ new Map();
+var init = '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["' + system_dt + '",{"system":"' + system_dt + '","suffix":" "}],["' + system_d + '",{"system":"' + system_d + '","suffix":" "}],["' + system_t + '",{"system":"' + system_t + '","suffix":" "}]]';
+function register(style2) {
+  loadInit();
+  const name = style2.slice(style2.indexOf(" "), style2.indexOf("{")).trim();
+  const candidate = cssStringToObject(style2);
+  if (!candidate.system.startsWith("extends"))
+    return store_styles.set(name, candidate);
+  const system = store_styles.get(candidate.system.split(" ")[1]);
+  if (system)
+    store_styles.set(name, Object.assign({}, system, candidate, { system: system.system }));
+}
+function has(name) {
+  loadInit();
+  return store_styles.has(name);
+}
+function get(name) {
+  loadInit();
+  const curr = store_styles.get(name);
+  let { current = 0 } = curr;
+  curr.current = current + 1;
+  return getSymbol(curr, curr);
+}
+var store_counters = /* @__PURE__ */ new Map();
+function counterReset(c, value) {
+  store_counters.set(c, value);
+}
+function counterIncrement(c, increase) {
+  const current = store_counters.get(c) || 0;
+  if (Number.isNaN(increase))
+    increase = 1;
+  store_counters.set(c, current + increase);
+}
+function counterFunction(c, name) {
+  if (!name)
+    name = "decimal";
+  loadInit();
+  const current = store_counters.get(c) || 0;
+  if (!store_styles.has(name))
+    return "";
+  return getSymbol(store_styles.get(name), { suffix: "", prefix: "", current });
+}
+function loadInit() {
+  if (!init)
+    return;
+  JSON.parse(init).forEach(([key, value]) => store_styles.set(key, value));
+  init = false;
+}
+function getSymbol({ pad, system, symbols, negative, mask }, { current, suffix = "", prefix = "" }) {
+  let s2 = "";
+  switch (system) {
+    case "fixed":
+      s2 = symbols[current - 1];
+      if (typeof s2 === "undefined")
+        s2 = current;
+      break;
+    case "cyclic":
+      s2 = symbols.at((current - 1) % symbols.length);
+      break;
+    case "numeric":
+      s2 = current.toString(symbols.length).split("").map((n) => symbols[n]).join("");
+      break;
+    case "alphabetic":
+      s2 = current.toString(symbols.length).split("").map((n, i) => symbols[n - Number(!i)]).join("");
+      break;
+    case system_dt:
+      s2 = applyMask(datetime(), mask);
+      break;
+    case system_d:
+      s2 = applyMask(datetime().split("T")[0], mask);
+      break;
+    case system_t:
+      s2 = applyMask(datetime().split("T")[1], mask);
+      break;
+  }
+  if (current < 0) {
+    negative = (negative || '"-"').trim();
+    const [q] = negative;
+    const lastIndexOfq = negative.indexOf(q, 1);
+    const [pre, suf] = [negative.slice(0, lastIndexOfq + 1), negative.slice(lastIndexOfq + 1) || '""'].map((s3) => s3.trim().slice(1, -1));
+    s2 = pre + s2 + suf;
+  }
+  if (typeof pad !== "undefined") {
+    const i_space = pad.indexOf(" ");
+    const num = pad.slice(0, i_space);
+    const chars = pad.slice(i_space + 2, -1);
+    s2 = s2.padStart(Number(num), chars);
+  }
+  return prefix + s2 + suffix;
+}
+function applyMask(value, mask) {
+  if (typeof mask === "undefined")
+    return value;
+  const [symbols, m] = mask.split(" ").map((v) => v.slice(1, -1));
+  return value.split("").reduce(function(acc, curr, i) {
+    const mi = m[i] || "";
+    if (mi === symbols[0])
+      return acc;
+    return acc + (mi === symbols[1] ? curr : mi);
+  }, "");
+}
+function datetime() {
+  return (/* @__PURE__ */ new Date()).toISOString().split("Z")[0];
+}
+var quotes_strip = ["suffix", "prefix"];
+function cssStringToObject(css_str) {
+  const css_body = css_str.slice(css_str.indexOf("{") + 1, css_str.lastIndexOf("}"));
+  return css_body.split(";").reduce((out, curr) => {
+    let [key, ...value] = curr.split(":");
+    if (!value.length)
+      return out;
+    [key, value] = [key, value.join(":")].map((s2) => s2.trim());
+    if (quotes_strip.includes(key))
+      value = value.slice(1, -1);
+    else if ("symbols" === key)
+      value = value.replaceAll(/["']/g, "").split(" ");
+    else if (customRule("mask") === key)
+      key = "mask";
+    Reflect.set(out, key, value);
+    return out;
+  }, {});
+}
+
 // src/ansi_constants.js
 var import_node_util = require("node:util");
 var s = import_node_util.inspect.colors;
@@ -154,6 +279,7 @@ function applyNth(candidate, { is_colors }) {
   const filter = {};
   const margin = { left: "", right: "" };
   const content = { before: "", after: "" };
+  const content_todo = [];
   let tab_size = 7;
   const colors = candidate.split(";").reverse().reduce(function(out, rule) {
     if (!rule)
@@ -172,11 +298,25 @@ function applyNth(candidate, { is_colors }) {
       return out;
     }
     if (test("list-style")) {
-      content.before = unQuoteSemicol(value).value + content.before;
+      const { has_quotes, value: style_name } = unQuoteSemicol(value);
+      if (has_quotes)
+        content.before = style_name + content.before;
+      else if (has(style_name))
+        content.before = get(style_name) + content.before;
+      return out;
+    }
+    if (test("counter-reset")) {
+      const [c, v] = value.split(" ");
+      counterReset(c, Number(v));
+      return out;
+    }
+    if (test("counter-increment")) {
+      const [c, v] = value.split(" ");
+      content_todo.unshift(() => counterIncrement(c, Number(v)));
       return out;
     }
     if (test(customRule("content"))) {
-      content[name.slice(name.lastIndexOf("-") + 1)] += unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
+      content_todo.push(() => content[name.slice(name.lastIndexOf("-") + 1)] += Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\").matchAll(new RegExp(`((['"])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|counter\\((?<c>[^,\\)]*),? ?(?<cs>[^\\)]*)\\))`, "g"))).map(({ groups: { q, c, cs } }) => typeof q === "undefined" ? counterFunction(c, cs) : q).join(""));
       return out;
     }
     if (test("display") && value === "list-item") {
@@ -188,6 +328,7 @@ function applyNth(candidate, { is_colors }) {
       return out;
     return cssAnsiReducer(out, name + ":" + value);
   }, [[], []]);
+  content_todo.forEach((f) => f());
   return function(match) {
     let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
     if (colors.length)
@@ -237,8 +378,11 @@ function style(pieces, ...styles_arr) {
     if (!style2)
       return [];
     if (style2[0] === "@") {
-      if (style2.indexOf("@import") !== 0)
+      if (style2.indexOf("@import") !== 0) {
+        if (style2.indexOf("@counter-style") === 0)
+          register(style2);
         return [];
+      }
       let url = unQuoteSemicol(style2.slice(7)).value;
       if (url[0] === ".")
         url = (0, import_node_path.resolve)(import_node_process.argv[1], "..", url);

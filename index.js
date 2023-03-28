@@ -26,6 +26,7 @@ Object.assign(error, { style, css });
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { register as registerCounter } from "./src/counters.js";
 export function style(pieces, ...styles_arr){
 	if(Array.isArray(pieces))
 		styles_arr= CSStoLines(String.raw(pieces, styles_arr));
@@ -38,7 +39,11 @@ export function style(pieces, ...styles_arr){
 		if(!style) return [];
 
 		if(style[0]==="@"){
-			if(style.indexOf("@import")!==0) return [];
+			if(style.indexOf("@import")!==0){
+				if(style.indexOf("@counter-style")===0)
+					registerCounter(style);
+				return [];
+			}
 			let url= unQuoteSemicol(style.slice(7)).value;
 			if(url[0]===".") url= resolve(argv[1], "..", url);
 			try{
