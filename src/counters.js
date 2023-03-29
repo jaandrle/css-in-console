@@ -95,6 +95,7 @@ function applyMask(value, mask){
 function datetime(){ return (new Date()).toISOString().split("Z")[0]; }
 
 const only_string= [ "suffix", "prefix" ];
+import { parseCSSValueList } from './utils.js';
 function cssStringToObject(css_str){
 	const css_body= css_str.slice(css_str.indexOf('{')+1, css_str.lastIndexOf('}'));
 	return css_body.split(';').reduce(( out, curr ) => {
@@ -103,8 +104,7 @@ function cssStringToObject(css_str){
 		[ key, value ]= [ key, value.join(':') ].map(s=> s.trim());
 		
 		if("system"!==key)
-			value= Array.from(value.matchAll(/((["'])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|(?<l>\S))/g))
-				.map(({ groups: { q, l } })=> typeof q==="undefined"? l : q.replace(/\\(?!\\)/g, ""));
+			value= parseCSSValueList(value);
 		if(only_string.includes(key))
 			value= value.join("");
 		else if(customRule("mask")===key)
