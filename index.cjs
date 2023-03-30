@@ -30,8 +30,11 @@ __export(css_in_console_exports, {
 module.exports = __toCommonJS(css_in_console_exports);
 
 // src/utils.js
-function customRule(...rule) {
-  return "--terminal-" + rule.join("-");
+function createMark() {
+  return Math.random().toString().slice(2);
+}
+function customRule(...rule2) {
+  return "--terminal-" + rule2.join("-");
 }
 function usesColors(target) {
   if ("FORCE_COLORS" in process.env) {
@@ -55,9 +58,58 @@ function unQuoteSemicol(s2) {
   out.value = s2;
   return out;
 }
-function ruleCrean(rule) {
-  const [name, ...value] = rule.split(":");
+function ruleCrean(rule2) {
+  const [name, ...value] = rule2.split(":");
   return [name.trim(), value.join(":").trim()];
+}
+function parseCSSValueList(value_string) {
+  let curr = "";
+  let out = [];
+  let q = null;
+  const addOut = () => {
+    out.push(curr);
+    curr = "";
+  };
+  for (let i = 0, { length } = value_string; i < length; i += 1) {
+    const char = value_string[i];
+    if (q) {
+      if (char === q) {
+        q = null;
+      } else if (char === "\\") {
+        i += 1;
+        curr += value_string[i] || "";
+      } else {
+        curr += char;
+      }
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      q = char;
+      continue;
+    }
+    if (char !== " ") {
+      curr += char;
+      continue;
+    }
+    addOut();
+  }
+  if (curr)
+    addOut();
+  return out;
+}
+
+// src/subrules.js
+var store = /* @__PURE__ */ new Map();
+function rule(...r) {
+  return customRule("include", ...r);
+}
+function add(name, type, css2) {
+  const mark = createMark();
+  store.set(mark, { type, css: css2 });
+  return [name, rule(type) + ":" + mark + ";"];
+}
+function get(mark) {
+  return store.get(mark);
 }
 
 // src/counters.js
@@ -78,7 +130,7 @@ function has(name) {
   loadInit();
   return store_styles.has(name);
 }
-function get(name) {
+function get2(name) {
   loadInit();
   const curr = store_styles.get(name);
   let { current = 0 } = curr;
@@ -170,7 +222,7 @@ function cssStringToObject(css_str) {
       return out;
     [key, value] = [key, value.join(":")].map((s2) => s2.trim());
     if ("system" !== key)
-      value = Array.from(value.matchAll(new RegExp(`((["'])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|(?<l>\\S))`, "g"))).map(({ groups: { q, l } }) => typeof q === "undefined" ? l : q.replace(/\\(?!\\)/g, ""));
+      value = parseCSSValueList(value);
     if (only_string.includes(key))
       value = value.join("");
     else if (customRule("mask") === key)
@@ -240,7 +292,7 @@ function cssLine(style2) {
     let pseudo;
     [name, pseudo] = name.split(/:?:/).map((v) => v.trim());
     if (pseudo)
-      css2 = css2.replaceAll(new RegExp(customRule("content") + "-(before|after)", "g"), "content").replaceAll("content", customRule("content", pseudo));
+      return add(name, pseudo, css2);
     if (css2[css2.length - 1] !== ";")
       css2 += ";";
     return [name, css2];
@@ -273,17 +325,37 @@ function applyNth(candidate, { is_colors }) {
     return (m) => m.slice(2);
   const filter = {};
   const margin = { left: "", right: "" };
-  const content = { before: "", after: "" };
+  const content = { before: "", after: "", colors: {} };
   const content_todo = [];
   let tab_size = 7;
-  const colors = candidate.split(";").reverse().reduce(function(out, rule) {
-    if (!rule)
+  const colors = candidate.split(";").reverse().reduce(function(out, rule2) {
+    if (!rule2)
       return out;
-    const [name, value] = ruleCrean(rule);
+    const [name, value] = ruleCrean(rule2);
+    const test = (t) => name.indexOf(t) === 0;
+    if (test(rule())) {
+      const { type, css: css2 } = get(value);
+      if (type !== "before" && type !== "after")
+        return out;
+      content.colors[type] = css2.split(";").reverse().reduce(function(out2, rule3) {
+        if (!rule3)
+          return out2;
+        const [name2, value2] = ruleCrean(rule3);
+        if (filter[type + name2])
+          return out2;
+        filter[type + name2] = true;
+        const test2 = (t) => name2.indexOf(t) === 0;
+        if (test2("content")) {
+          content_todo.push(() => content[type] += Array.from(value2.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\").matchAll(new RegExp(`((['"])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|counter\\((?<c>[^,\\)]*),? ?(?<cs>[^\\)]*)\\))`, "g"))).map(({ groups: { q, c, cs } }) => typeof q === "undefined" ? counterFunction(c, cs) : q).join(""));
+          return out2;
+        }
+        return commonRules(out2, test2, name2, value2);
+      }, [[], []]);
+      return out;
+    }
     if (filter[name])
       return out;
     filter[name] = true;
-    const test = (t) => name.indexOf(t) === 0;
     if (test("padding") || test("margin")) {
       margin[name.split("-")[1].trim()] = " ".repeat(parseInt(value));
       return out;
@@ -297,9 +369,27 @@ function applyNth(candidate, { is_colors }) {
       if (has_quotes)
         content.before = style_name + content.before;
       else if (has(style_name))
-        content.before = get(style_name) + content.before;
+        content.before = get2(style_name) + content.before;
       return out;
     }
+    if (test("display") && value === "list-item") {
+      if (!filter["list-style"])
+        content.before = "- " + content.before;
+      return out;
+    }
+    return commonRules(out, test, name, value);
+  }, [[], []]);
+  content_todo.forEach((f) => f());
+  return function(match) {
+    const out = applyColors(content.before, content.colors.before || colors) + applyColors(match.slice(2).replaceAll("	", " ".repeat(tab_size)), colors) + applyColors(content.after, content.colors.after || colors);
+    return margin.left + out + margin.right;
+  };
+  function applyColors(test, colors2) {
+    if (!colors2 || !colors2.length)
+      return test;
+    return `\x1B[${colors2[0].join(";")}m` + test + `\x1B[${colors2[1].join(";")}m`;
+  }
+  function commonRules(out, test, name, value) {
     if (test("counter-reset")) {
       const [c, v] = value.split(" ");
       counterReset(c, Number(v));
@@ -310,26 +400,10 @@ function applyNth(candidate, { is_colors }) {
       content_todo.unshift(() => counterIncrement(c, Number(v)));
       return out;
     }
-    if (test(customRule("content"))) {
-      content_todo.push(() => content[name.slice(name.lastIndexOf("-") + 1)] += Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\").matchAll(new RegExp(`((['"])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|counter\\((?<c>[^,\\)]*),? ?(?<cs>[^\\)]*)\\))`, "g"))).map(({ groups: { q, c, cs } }) => typeof q === "undefined" ? counterFunction(c, cs) : q).join(""));
-      return out;
-    }
-    if (test("display") && value === "list-item") {
-      if (!filter["list-style"])
-        content.before = "- " + content.before;
-      return out;
-    }
     if (!is_colors)
       return out;
     return cssAnsiReducer(out, name + ":" + value);
-  }, [[], []]);
-  content_todo.forEach((f) => f());
-  return function(match) {
-    let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
-    if (colors.length)
-      out = `\x1B[${colors[0].join(";")}m` + out + `\x1B[${colors[1].join(";")}m`;
-    return margin.left + out + margin.right;
-  };
+  }
 }
 function cssAnsiReducer(curr, c) {
   const a = ansi_constants[c];
