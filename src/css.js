@@ -74,7 +74,7 @@ function applyNth(candidate, { is_colors }){
 			content.before +
 			match.slice(2).replaceAll("\t", " ".repeat(tab_size)) +
 			content.after;
-		if(colors.length)
+		if(colors[0].length)
 			out=
 				`\x1B[${colors[0].join(';')}m` +
 				out +

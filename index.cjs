@@ -190,7 +190,7 @@ function applyNth(candidate, { is_colors }) {
   }, [[], []]);
   return function(match) {
     let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
-    if (colors.length)
+    if (colors[0].length)
       out = `\x1B[${colors[0].join(";")}m` + out + `\x1B[${colors[1].join(";")}m`;
     return margin.left + out + margin.right;
   };
