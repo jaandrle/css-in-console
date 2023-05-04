@@ -1,4 +1,4 @@
-import { customRule, ruleCrean, unQuoteSemicol } from "./utils.js";
+import { ruleCrean, unQuoteSemicol } from "./utils.js";
 import * as subrules from "./subrules.js";
 export function cssLine(style){
 	let [ name_candidate, css ]= style.replace("}","").split("{").map(v=> v.trim());
@@ -38,14 +38,20 @@ function applyNth(candidate, { is_colors }){
 	const content_todo= [];
 	let tab_size= 7;
 	const colors= candidate.split(";")
-		.reverse().reduce(function(out, rule){
+		.reverse().reduce(function processCandidate(out, rule){
 			if(!rule) return out;
 			const [ name, value ]= ruleCrean(rule);
 			
 			const test= t=> name.indexOf(t)===0;
 			if(test(subrules.rule())){
 				const { type, css }= subrules.get(value);
-				if(type!=="before"&&type!=="after")
+				console.log({ type, is_colors });
+				if( type.startsWith("media") && (
+					( type==="mediacolor" && is_colors ) || !is_colors
+				))
+					return css.split(";").reverse().reduce(processCandidate, out);
+
+				if(type!=="before" && type!=="after")
 					return out;
 				content.colors[type]= css.split(";")
 					.reverse().reduce(function(out, rule){

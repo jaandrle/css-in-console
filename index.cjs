@@ -28,6 +28,7 @@ __export(css_in_console_exports, {
   style: () => style
 });
 module.exports = __toCommonJS(css_in_console_exports);
+var import_node_util2 = require("node:util");
 
 // src/utils.js
 function createMark() {
@@ -328,13 +329,16 @@ function applyNth(candidate, { is_colors }) {
   const content = { before: "", after: "", colors: {} };
   const content_todo = [];
   let tab_size = 7;
-  const colors = candidate.split(";").reverse().reduce(function(out, rule2) {
+  const colors = candidate.split(";").reverse().reduce(function processCandidate(out, rule2) {
     if (!rule2)
       return out;
     const [name, value] = ruleCrean(rule2);
     const test = (t) => name.indexOf(t) === 0;
     if (test(rule())) {
       const { type, css: css2 } = get(value);
+      console.log({ type, is_colors });
+      if (type.startsWith("media") && (type === "mediacolor" && is_colors || !is_colors))
+        return css2.split(";").reverse().reduce(processCandidate, out);
       if (type !== "before" && type !== "after")
         return out;
       content.colors[type] = css2.split(";").reverse().reduce(function(out2, rule3) {
@@ -413,7 +417,6 @@ function cssAnsiReducer(curr, c) {
 }
 
 // index.js
-var import_node_util2 = require("node:util");
 var import_node_console = require("node:console");
 var import_node_process = require("node:process");
 var import_node_fs = require("node:fs");
@@ -426,10 +429,10 @@ function formatWithOptions(options, ...messages) {
   messages = apply(messages, { is_colors });
   return (0, import_node_util2.formatWithOptions)(options, ...messages);
 }
-var css = style;
 function log(...messages) {
   return (0, import_node_console.log)(formatWithOptions({ colors: usesColors("stdout") }, ...messages));
 }
+var css = style;
 Object.assign(log, { style, css });
 function error(...messages) {
   return (0, import_node_console.error)(formatWithOptions({ colors: usesColors("stderr") }, ...messages));
@@ -441,18 +444,33 @@ function style(pieces, ...styles_arr) {
   else
     styles_arr.unshift(pieces);
   const out = { unset: "unset:all" };
-  let all = "";
-  const styles_preprocessed = styles_arr.flatMap(function(style2) {
-    style2 = style2.trim();
-    if (!style2)
+  let all = "", subrule_all = {}, subrule_css = "";
+  const styles_preprocessed = styles_arr.flatMap(function(style_nth) {
+    style_nth = style_nth.trim();
+    if (!style_nth)
       return [];
-    if (style2[0] === "@") {
-      if (style2.indexOf("@import") !== 0) {
-        if (style2.indexOf("@counter-style") === 0)
-          register(style2);
+    if (subrule_css) {
+      if (style_nth !== "}") {
+        subrule_css += style_nth;
         return [];
       }
-      let url = unQuoteSemicol(style2.slice(7)).value;
+      if (!subrule_css.startsWith("@media"))
+        return [];
+      const idx = subrule_css.indexOf("{");
+      const name = subrule_css.slice(0, idx).replace(/[\(\) ]/g, "");
+      const css2 = style(...CSStoLines(subrule_css.slice(idx + 1)));
+      subrule_css = "";
+      return Object.entries(css2).slice(1).map(([key, css3]) => add(name + "-" + key, name.slice(1), css3));
+    }
+    if (style_nth[0] === "@") {
+      if (style_nth.indexOf("@import") !== 0) {
+        if (style_nth.indexOf("@counter-style") === 0)
+          register(style_nth);
+        else
+          subrule_css += style_nth;
+        return [];
+      }
+      let url = unQuoteSemicol(style_nth.slice(7)).value;
       if (url[0] === ".")
         url = (0, import_node_path.resolve)(import_node_process.argv[1], "..", url);
       try {
@@ -461,9 +479,15 @@ function style(pieces, ...styles_arr) {
         throw new Error(`Unable to import file ${url}: ${error2.message}`);
       }
     }
-    return cssLine(style2);
+    return cssLine(style_nth);
   });
   for (const [name, css2] of styles_preprocessed) {
+    if (name[0] === "@") {
+      const key = name.slice(name.indexOf("-") + 1);
+      subrule_all[key] = (subrule_all[key] || "") + css2;
+      out[key] += css2;
+      continue;
+    }
     if (name === "*") {
       all += css2;
       Object.keys(out).forEach((key) => key !== "unset" && (out[key] += css2));
@@ -472,7 +496,7 @@ function style(pieces, ...styles_arr) {
     if (out[name])
       out[name] += css2;
     else
-      out[name] = all + css2;
+      out[name] = all + (subrule_all[name] || "") + css2;
   }
   return out;
 }
