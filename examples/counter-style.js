@@ -14,7 +14,8 @@ const css= log.css`
 		symbols: ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏;
 		suffix: " ";
 	}
-	.spin{ display: list-item; list-style: spin; }
+	.spin{ margin-left: 1ch; }
+	.spin::before{ content: counter(spin, spin) " "; color: lightgreen; counter-increment: spin; }
 
 	@counter-style time{
 		system: extends --terminal-time;
