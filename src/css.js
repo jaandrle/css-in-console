@@ -45,7 +45,6 @@ function applyNth(candidate, { is_colors }){
 			const test= t=> name.indexOf(t)===0;
 			if(test(subrules.rule())){
 				const { type, css }= subrules.get(value);
-				console.log({ type, is_colors });
 				if( type.startsWith("media") && (
 					( type==="mediacolor" && is_colors ) || !is_colors
 				))

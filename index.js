@@ -35,7 +35,7 @@ export function style(pieces, ...styles_arr){
 	else
 		styles_arr.unshift(pieces);
 	const out= { unset: "unset:all" };
-	let all= "", subrule_all= {}, subrule_css= "";
+	let all= "", subrule_css= "";
 	const styles_preprocessed= styles_arr.flatMap(function(style_nth){
 		style_nth= style_nth.trim();
 		if(!style_nth) return [];
@@ -44,13 +44,14 @@ export function style(pieces, ...styles_arr){
 				subrule_css+= style_nth;
 				return [];
 			}
-			if(!subrule_css.startsWith("@media"))
+			if(!subrule_css.startsWith("@media") || !subrule_css.includes("color"))
 				return [];
 			const idx= subrule_css.indexOf("{");
-			const name= subrule_css.slice(0, idx).replace(/[\(\) ]/g, "");
+			const name= subrule_css.slice(0, idx).replace(/[\(\) ]/g, "").slice(1);
 			const css= style(...CSStoLines(subrule_css.slice(idx+1)));
 			subrule_css= "";
-			return Object.entries(css).slice(1).map(([ key, css ])=> addSubrule(name+"-"+key, name.slice(1), css));
+			return Object.entries(css).slice(1)
+				.map(([ key, css ])=> addSubrule(key, name, css));
 		}
 
 		if(style_nth[0]==="@"){
@@ -73,12 +74,6 @@ export function style(pieces, ...styles_arr){
 		return cssLine(style_nth);
 	});
 	for(const [ name, css ] of styles_preprocessed){
-		if(name[0]==="@"){
-			const key= name.slice(name.indexOf("-")+1);
-			subrule_all[key]= (subrule_all[key] || "") + css;
-			out[key]+= css
-			continue;
-		}
 		if(name==="*"){
 			all+= css;
 			Object.keys(out).forEach(key=> key!=="unset" && ( out[key]+= css ));
@@ -87,7 +82,7 @@ export function style(pieces, ...styles_arr){
 		if(out[name])
 			out[name]+= css;
 		else
-			out[name]= all + (subrule_all[name] || "") + css;
+			out[name]= all + css;
 	}
 	return out;
 }

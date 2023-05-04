@@ -336,7 +336,6 @@ function applyNth(candidate, { is_colors }) {
     const test = (t) => name.indexOf(t) === 0;
     if (test(rule())) {
       const { type, css: css2 } = get(value);
-      console.log({ type, is_colors });
       if (type.startsWith("media") && (type === "mediacolor" && is_colors || !is_colors))
         return css2.split(";").reverse().reduce(processCandidate, out);
       if (type !== "before" && type !== "after")
@@ -444,7 +443,7 @@ function style(pieces, ...styles_arr) {
   else
     styles_arr.unshift(pieces);
   const out = { unset: "unset:all" };
-  let all = "", subrule_all = {}, subrule_css = "";
+  let all = "", subrule_css = "";
   const styles_preprocessed = styles_arr.flatMap(function(style_nth) {
     style_nth = style_nth.trim();
     if (!style_nth)
@@ -454,13 +453,13 @@ function style(pieces, ...styles_arr) {
         subrule_css += style_nth;
         return [];
       }
-      if (!subrule_css.startsWith("@media"))
+      if (!subrule_css.startsWith("@media") || !subrule_css.includes("color"))
         return [];
       const idx = subrule_css.indexOf("{");
-      const name = subrule_css.slice(0, idx).replace(/[\(\) ]/g, "");
+      const name = subrule_css.slice(0, idx).replace(/[\(\) ]/g, "").slice(1);
       const css2 = style(...CSStoLines(subrule_css.slice(idx + 1)));
       subrule_css = "";
-      return Object.entries(css2).slice(1).map(([key, css3]) => add(name + "-" + key, name.slice(1), css3));
+      return Object.entries(css2).slice(1).map(([key, css3]) => add(key, name, css3));
     }
     if (style_nth[0] === "@") {
       if (style_nth.indexOf("@import") !== 0) {
@@ -482,12 +481,6 @@ function style(pieces, ...styles_arr) {
     return cssLine(style_nth);
   });
   for (const [name, css2] of styles_preprocessed) {
-    if (name[0] === "@") {
-      const key = name.slice(name.indexOf("-") + 1);
-      subrule_all[key] = (subrule_all[key] || "") + css2;
-      out[key] += css2;
-      continue;
-    }
     if (name === "*") {
       all += css2;
       Object.keys(out).forEach((key) => key !== "unset" && (out[key] += css2));
@@ -496,7 +489,7 @@ function style(pieces, ...styles_arr) {
     if (out[name])
       out[name] += css2;
     else
-      out[name] = all + (subrule_all[name] || "") + css2;
+      out[name] = all + css2;
   }
   return out;
 }
