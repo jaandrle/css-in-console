@@ -1,3 +1,4 @@
+export function createMark(){ return Math.random().toString().slice(2); }
 export function customRule(...rule){ return "--terminal-"+rule.join("-"); }
 /** @param {"stderr"|"stdout"} target */
 	export function usesColors(target){//?also levels, see supports-color, and ?$.isFIFO

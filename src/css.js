@@ -1,13 +1,12 @@
 import { customRule, ruleCrean, unQuoteSemicol } from "./utils.js";
+import * as subrules from "./subrules.js";
 export function cssLine(style){
 	let [ name_candidate, css ]= style.replace("}","").split("{").map(v=> v.trim());
 	name_candidate= name_candidate.replaceAll(/[\.#]/g, "");
 	return name_candidate.split(",").map(name=> {
 		let pseudo;
 		[ name, pseudo ]= name.split(/:?:/).map(v=> v.trim());
-		if(pseudo) css= css
-			.replaceAll(new RegExp(customRule("content")+"-(before|after)", "g"), "content")
-			.replaceAll("content", customRule("content", pseudo));
+		if(pseudo) return subrules.add(name, pseudo, css);
 		if(css[css.length-1]!==";") css+= ";";
 		return [ name, css ];
 	});
@@ -35,17 +34,43 @@ function applyNth(candidate, { is_colors }){
 	if(candidate.indexOf(":")===-1) return m=> m.slice(2);
 	const filter= {};
 	const margin= { left: "", right: "" };
-	const content= { before: "", after: "" };
+	const content= { before: "", after: "", colors: {} };
 	const content_todo= [];
 	let tab_size= 7;
 	const colors= candidate.split(";")
 		.reverse().reduce(function(out, rule){
 			if(!rule) return out;
 			const [ name, value ]= ruleCrean(rule);
+			
+			const test= t=> name.indexOf(t)===0;
+			if(test(subrules.rule())){
+				const { type, css }= subrules.get(value);
+				if(type!=="before"&&type!=="after")
+					return out;
+				content.colors[type]= css.split(";")
+					.reverse().reduce(function(out, rule){
+						if(!rule) return out;
+						const [ name, value ]= ruleCrean(rule);
+						if(filter[type+name]) return out;
+						filter[type+name]= true;
+						
+						const test= t=> name.indexOf(t)===0;
+						if(test("content")){
+							content_todo.push(()=> content[type]+=
+								Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
+									.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
+									.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
+									.join(""));
+							return out;
+						}
+						return commonRules(out, test, name, value);
+					}, [ [], [] ]);
+				return out;
+			}
+			
 			if(filter[name]) return out;
 			filter[name]= true;
 			
-			const test= t=> name.indexOf(t)===0;
 			if(test("padding") || test("margin")){
 				margin[name.split("-")[1].trim()]= " ".repeat(parseInt(value));
 				return out;
@@ -62,46 +87,42 @@ function applyNth(candidate, { is_colors }){
 					content.before= counters.get(style_name) + content.before;
 				return out;
 			}
-			if(test("counter-reset")){
-				const [c, v]= value.split(" ");
-				counters.counterReset(c, Number(v));
-				return out;
-			}
-			if(test("counter-increment")){
-				const [c, v]= value.split(" ");
-				content_todo.unshift(()=> counters.counterIncrement(c, Number(v)));
-				return out;
-			}
-			if(test(customRule("content"))){
-				content_todo.push(()=> content[name.slice(name.lastIndexOf("-")+1)]+=
-					Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
-						.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
-						.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
-						.join(""));
-				return out;
-			}
 			if(test("display")&&value==="list-item"){
 				if(!filter["list-style"])
 					content.before= "- " + content.before;
 				return out;
 			}
-			if(!is_colors)
-				return out;
-			return cssAnsiReducer(out, name+":"+value);
+			return commonRules(out, test, name, value);
 		}, [ [], [] ]);
 	content_todo.forEach(f=> f());
 	return function(match){
-		let out= 
-			content.before +
-			match.slice(2).replaceAll("\t", " ".repeat(tab_size)) +
-			content.after;
-		if(colors.length)
-			out=
-				`\x1B[${colors[0].join(';')}m` +
-				out +
-				`\x1B[${colors[1].join(';')}m`;
+		const out= 
+			applyColors(content.before, content.colors.before || colors) +
+			applyColors(match.slice(2).replaceAll("\t", " ".repeat(tab_size)), colors) +
+			applyColors(content.after, content.colors.after || colors);
 		return margin.left + out + margin.right;
 	};
+	function applyColors(test, colors){
+		if(!colors||!colors.length) return test;
+		return `\x1B[${colors[0].join(';')}m` +
+			test +
+			`\x1B[${colors[1].join(';')}m`;
+	}
+	function commonRules(out, test, name, value){
+		if(test("counter-reset")){
+			const [c, v]= value.split(" ");
+			counters.counterReset(c, Number(v));
+			return out;
+		}
+		if(test("counter-increment")){
+			const [c, v]= value.split(" ");
+			content_todo.unshift(()=> counters.counterIncrement(c, Number(v)));
+			return out;
+		}
+		if(!is_colors)
+			return out;
+		return cssAnsiReducer(out, name+":"+value);
+	}
 }
 import { ansi_constants } from "./ansi_constants.js";
 function cssAnsiReducer(curr, c){
