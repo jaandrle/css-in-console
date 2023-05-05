@@ -33,6 +33,12 @@ For example, with npm:
 npm install css-in-console --save
 ```
 
+If you are OK with only basic styling (no at-rules, …), you can install the 1.x.y version:
+```sh
+npm install css-in-console@1 --save
+```
+
+
 ## Usage
 
 First, you need to import the required functions and types from the `css-in-console` library:
@@ -64,7 +70,6 @@ The exported functions process the CSS (`%c` expression) in the first step and t
 
 ### Defining CSS-like rules
 You can also use the `style`/`css` or `log.style`/`log.css` helpers to prepare styling rules (they are aliases for the same function).
-Beware of using ‘real’ CSS! Treat the syntax more like keywords, the library is not intended to implement a CSS parser.
 Originally, there was only `style`, but other options (mainly `log.css`) seem to be convenient when you want to use `css` variable and use syntax highlight in your editor, e.g.:
 - [jonsmithers/vim-html-template-literals](https://github.com/jonsmithers/vim-html-template-literals)
 - [es6-string-css - Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=bashmish.es6-string-css)
@@ -76,6 +81,13 @@ log("%cExample", css.example);
 ```
 
 ## Documentation and Examples
+For library documentation and examples, see:
+- [documentation](./docs/README.md) (generated from TypeScript definition file)
+- [examples](./examples)
+
+In the following we will introduce the supported CSS constructs.
+Beware of using ‘real’ CSS! Treat the syntax more like keywords, the library is not intended to implement a CSS parser.
+CSS at-rules and selectors are supported only when used in `style`/`css`/`log.css` functions.
 
 ### CSS at-rules
 This library mimic [At-rules | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule) behaviour
@@ -155,16 +167,49 @@ and supports:
 	- [counter() - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/counter)
 	</details>
 
-## TypeScript Documentation & Examples
-For more information see:
-- [documentation](./docs/README.md) (generated from TypeScript definition file)
-	- [`css_rules`](./docs/README.md#css_rules): supported CSS rules
-	- [`css_colors`](./docs/README.md#css_colors): supported CSS colors
-- [examples](./examples)
+### CSS selectors
+Classes are the preferred selectors because they are intuitive as object properties:
+```javascript
+const css= log.css`
+	.example{ … }
+`;
+log("%cExample", css.example);
+```
+…it is also convenient not to use *kebab-case* names.
+
+Technically, it is possible to use ID selectors and HTML elements. But these are escaped
+using `.replaceAll(/[\.#]/g, "")` and (so far?) no practical effect from using them.
+
+In term of pseudo-elements, only [`::before`/`::after`](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Selectors/Pseudo-classes_and_pseudo-elements#generating_content_with_before_and_after) are supported.
+
+Other CSS selectors are not supported (and probably have no use in the terminal).
+
+### CSS rules
+As mentioned above, mostly more keywords than syntax.
+*You can use `initial` value to sets the initial value of any property.*
+> - Rules marked with {★} are ignored when the colors are not supported.
+> - Rules marked with {!::} are **not** supported for `::before`/`::after`.
+
+- `color: <color>` / `background: <color>` {★}: see [supported colors](./docs/README.md#css_colors)
+- `margin-left: <number>` / `margin-right: <number>` {!::}: inserts spaces before/after the string. Measurements `<number><measurement>` can also be used (e.g. `ch` makes sense). But in the post-processing is ignored.
+- `padding-left: <number>` / `padding-right: <number>` {!::}: For now just alias for `margin-*`
+- `font-style: italic` {★}
+- `font-weight: bold` {★}
+- `text-decoration: underline|line-through` {★}
+- `animation: blink` {★}
+- `tab-size: <number>` {!::}: all tabs will be replaced with given number of spaces (default: 2)
+- `display: none` {★}
+- `display: list-item` {!::}: basic implementation of [list-style-type - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type)
+	- `list-style-type: "<string>"`: defaults to `"- "`
+	- `list-style-type: <counter>` (see `@counter-style` above)
+	- `list-style: *`: just an alias for `list-style-type`
+- `content: *`: supported only for `::before` and `::after`, library implements only basic of [content - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/content)
+	- `content: "<string>"`
+	- `content: <counter/string combination>`: you can use [`counter()`](https://developer.mozilla.org/en-US/docs/Web/CSS/counter)
+- [`counter-increment`](https://developer.mozilla.org/en-US/docs/Web/CSS/counter-increment): only `<counter>`/`<counter> <integer>` values are supported
+- [`counter-reset`](https://developer.mozilla.org/en-US/docs/Web/CSS/counter-reset): only `<counter>`/`<counter> <integer>` values are supported
 
 ## Options under consideration for next release(s)
-- support (some) functions/keywords for `content`/`list-style-type` (+ add custom such as ‘timestamp’/‘date’/‘time’)
-- `@media … (color) …`?
 - `width`/`text-overflow`/`white-space`
 - `display:block` ⇒ append "\n"?
 - `text-align`

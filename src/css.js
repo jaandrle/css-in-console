@@ -58,6 +58,7 @@ function applyNth(candidate, { is_colors }){
 						const [ name, value ]= ruleCrean(rule);
 						if(filter[type+name]) return out;
 						filter[type+name]= true;
+						if("initial"===value) return out;
 						
 						const test= t=> name.indexOf(t)===0;
 						if(test("content")){
@@ -75,6 +76,7 @@ function applyNth(candidate, { is_colors }){
 			
 			if(filter[name]) return out;
 			filter[name]= true;
+			if("initial"===value) return out;
 			
 			if(test("padding") || test("margin")){
 				margin[name.split("-")[1].trim()]= " ".repeat(parseInt(value));
