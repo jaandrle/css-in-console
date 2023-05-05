@@ -9,19 +9,23 @@ const css= log.css`
 	}
 	.li{ display: list-item; list-style: num; counter-reset: i -11; }
 
-	@counter-style spin{
+	@counter-style thumbs {
 		system: cyclic;
-		symbols: ⠋ ⠙ ⠹ ⠸ ⠼ ⠴ ⠦ ⠧ ⠇ ⠏;
+		symbols: 👍 👎;
 		suffix: " ";
 	}
+	@counter-style spin{
+		system: extends --terminal-spin;
+		symbols: \ | / -;
+	}
 	.spin{ margin-left: 1ch; }
-	.spin::before{ content: counter(spin, spin) " "; color: lightgreen; counter-increment: spin; }
+	.spin::before{ content: counter(spin-i, spin) " "; color: lightgreen; counter-increment: spin-i; }
 
 	@counter-style time{
 		system: extends --terminal-time;
 		suffix: ") ";
 		prefix: "(";
-		--terminal-mask: "01" "00011111,111";
+		--terminal-mask: "01" "000111110000";
 	}
 	.time{ display: list-item; list-style: time; }
 `;
@@ -54,5 +58,6 @@ log("%cSpinner example", css.spin);
 log("%cSpinner example", css.spin);
 log("%cSpinner example", css.spin);
 log("");
+log("%cTimestamp example with `mask`.", css.time);
 log("%cTimestamp example with `mask`.", css.time);
 process.exit(0);

@@ -116,7 +116,7 @@ function get(mark) {
 // src/counters.js
 var [system_dt, system_d, system_t] = ["datetime", "date", "time"].map((v) => customRule(v));
 var store_styles = /* @__PURE__ */ new Map();
-var init = '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["' + system_dt + '",{"system":"' + system_dt + '","suffix":" "}],["' + system_d + '",{"system":"' + system_d + '","suffix":" "}],["' + system_t + '",{"system":"' + system_t + '","suffix":" "}]]';
+var init = '[["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],["' + system_dt + '",{"system":"' + system_dt + '","suffix":" "}],["' + system_d + '",{"system":"' + system_d + '","suffix":" "}],["' + system_t + '",{"system":"' + system_t + '","suffix":" "}],["' + customRule("spin") + '",{"system":"cyclic","symbols":["\u280B","\u2819","\u2839","\u2838","\u283C","\u2834","\u2826","\u2827","\u2807","\u280F"],"suffix":" "}]]';
 function register(style2) {
   loadInit();
   const name = style2.slice(style2.indexOf(" "), style2.indexOf("{")).trim();
