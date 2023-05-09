@@ -1,13 +1,10 @@
 import { customRule } from './utils.js';
 const [ system_dt, system_d, system_t ]= [ "datetime", "date", "time" ].map(v=> customRule(v));
-/* 
- * https://developer.mozilla.org/en-US/docs/Web/CSS/@counter-style
- * https://developer.mozilla.org/en-US/docs/Web/CSS/counter
- * */
 const store_styles= new Map();
 let init= '[' +
 	'["decimal",{"system":"numeric","symbols":["0","1","2","3","4","5","6","7","8","9"],"suffix":". "}],' +
-	'["'+system_dt+'",{"system":"'+system_dt+'","suffix":" "}],["'+system_d+'",{"system":"'+system_d+'","suffix":" "}],["'+system_t+'",{"system":"'+system_t+'","suffix":" "}]' +
+	'["'+system_dt+'",{"system":"'+system_dt+'","suffix":" "}],["'+system_d+'",{"system":"'+system_d+'","suffix":" "}],["'+system_t+'",{"system":"'+system_t+'","suffix":" "}],' +
+	'["'+customRule("spin")+'",{"system":"cyclic","symbols":["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"],"suffix":" "}]' +
 ']';
 
 export function register(style){

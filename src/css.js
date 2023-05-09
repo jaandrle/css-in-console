@@ -1,4 +1,4 @@
-import { customRule, ruleCrean, unQuoteSemicol } from "./utils.js";
+import { ruleCrean, unQuoteSemicol } from "./utils.js";
 import * as subrules from "./subrules.js";
 export function cssLine(style){
 	let [ name_candidate, css ]= style.replace("}","").split("{").map(v=> v.trim());
@@ -38,14 +38,19 @@ function applyNth(candidate, { is_colors }){
 	const content_todo= [];
 	let tab_size= 7;
 	const colors= candidate.split(";")
-		.reverse().reduce(function(out, rule){
+		.reverse().reduce(function processCandidate(out, rule){
 			if(!rule) return out;
 			const [ name, value ]= ruleCrean(rule);
 			
 			const test= t=> name.indexOf(t)===0;
 			if(test(subrules.rule())){
 				const { type, css }= subrules.get(value);
-				if(type!=="before"&&type!=="after")
+				if( type.startsWith("media") && (
+					( type==="mediacolor" && is_colors ) || !is_colors
+				))
+					return css.split(";").reverse().reduce(processCandidate, out);
+
+				if(type!=="before" && type!=="after")
 					return out;
 				content.colors[type]= css.split(";")
 					.reverse().reduce(function(out, rule){
@@ -53,6 +58,7 @@ function applyNth(candidate, { is_colors }){
 						const [ name, value ]= ruleCrean(rule);
 						if(filter[type+name]) return out;
 						filter[type+name]= true;
+						if("initial"===value) return out;
 						
 						const test= t=> name.indexOf(t)===0;
 						if(test("content")){
@@ -70,6 +76,7 @@ function applyNth(candidate, { is_colors }){
 			
 			if(filter[name]) return out;
 			filter[name]= true;
+			if("initial"===value) return out;
 			
 			if(test("padding") || test("margin")){
 				margin[name.split("-")[1].trim()]= " ".repeat(parseInt(value));
