@@ -261,20 +261,6 @@ ___
 
 Ƭ **css\_rules**: \`@import "${string}"\` \| ``"unset: all;"`` \| \`display: ${"none" \| "list-item"};\` \| \`color: ${css\_colors};\` \| \`background: ${css\_colors};\` \| \`margin-${"left" \| "right"}: ${number};\` \| ``"font-style: italic;"`` \| ``"font-weight: bold;"`` \| \`text-decoration: ${"underline" \| "line-through"}\` \| \`list-style-type: ${string}\` \| ``"animation: blink;"``
 
-- `color: COLOR` – see [css_colors](README.md#css_colors)
-- `background: COLOR` – see [css_colors](README.md#css_colors)
-- `margin-left: NUMBER` – counts spaces before string
-- `margin-right: NUMBER` – counts spaces after string
-- `font-style: italic`
-- `font-weight: bold`
-- `text-decoration: underline|line-through`
-- `display: none|list-item`
-- `list-style-type: "…"` – to be used for `display:list-item` (default: `"- "`)
-- `animation:blink`
-- `content: "…"` – allowed only for pseudo selectors `::before`/`::after`
-- `@import "…"` – to import styles from css file, not supported recursive importing ⇒ can be used only in JavaScript function [style](README.md#style)
-- `tab-size: NUMBER` – all tabs will be replaced with given number of spaces (default: 2)
-
 ___
 
 ### cssTemplate

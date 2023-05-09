@@ -336,29 +336,18 @@ function applyNth(candidate, { is_colors }) {
     const test = (t) => name.indexOf(t) === 0;
     if (test(rule())) {
       const { type, css: css2 } = get(value);
-      if (type.startsWith("media") && (type === "mediacolor" && is_colors || !is_colors))
+      if (type.startsWith("media") && testColorMediaAtRule(type, is_colors))
         return css2.split(";").reverse().reduce(processCandidate, out);
       if (type !== "before" && type !== "after")
         return out;
-      content.colors[type] = css2.split(";").reverse().reduce(function(out2, rule3) {
-        if (!rule3)
-          return out2;
-        const [name2, value2] = ruleCrean(rule3);
-        if (filter[type + name2])
-          return out2;
-        filter[type + name2] = true;
-        const test2 = (t) => name2.indexOf(t) === 0;
-        if (test2("content")) {
-          content_todo.push(() => content[type] += Array.from(value2.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\").matchAll(new RegExp(`((['"])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|counter\\((?<c>[^,\\)]*),? ?(?<cs>[^\\)]*)\\))`, "g"))).map(({ groups: { q, c, cs } }) => typeof q === "undefined" ? counterFunction(c, cs) : q).join(""));
-          return out2;
-        }
-        return commonRules(out2, test2, name2, value2);
-      }, [[], []]);
+      registerBeforeAndAfter(content, { type, css: css2 });
       return out;
     }
     if (filter[name])
       return out;
     filter[name] = true;
+    if ("initial" === value)
+      return out;
     if (test("padding") || test("margin")) {
       margin[name.split("-")[1].trim()] = " ".repeat(parseInt(value));
       return out;
@@ -388,7 +377,7 @@ function applyNth(candidate, { is_colors }) {
     return margin.left + out + margin.right;
   };
   function applyColors(test, colors2) {
-    if (!colors2 || !colors2.length)
+    if (!colors2 || !colors2.length || !colors2[0].length)
       return test;
     return `\x1B[${colors2[0].join(";")}m` + test + `\x1B[${colors2[1].join(";")}m`;
   }
@@ -407,6 +396,27 @@ function applyNth(candidate, { is_colors }) {
       return out;
     return cssAnsiReducer(out, name + ":" + value);
   }
+  function registerBeforeAndAfter(content2, { type, css: css2 }) {
+    content2.colors[type] = css2.split(";").reverse().reduce(function(out, rule2) {
+      if (!rule2)
+        return out;
+      const [name, value] = ruleCrean(rule2);
+      if (filter[type + name])
+        return out;
+      filter[type + name] = true;
+      if ("initial" === value)
+        return out;
+      const test = (t) => name.indexOf(t) === 0;
+      if (test("content")) {
+        content_todo.push(() => content2[type] += Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\").matchAll(new RegExp(`((['"])(?<q>(?:(?!\\2)[^\\\\]|\\\\[\\s\\S])*)\\2|counter\\((?<c>[^,\\)]*),? ?(?<cs>[^\\)]*)\\))`, "g"))).map(({ groups: { q, c, cs } }) => typeof q === "undefined" ? counterFunction(c, cs) : q).join(""));
+        return out;
+      }
+      return commonRules(out, test, name, value);
+    }, [[], []]);
+  }
+}
+function testColorMediaAtRule(type, is_colors) {
+  return type === "mediacolor" && is_colors || !is_colors;
 }
 function cssAnsiReducer(curr, c) {
   const a = ansi_constants[c];

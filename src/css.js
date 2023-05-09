@@ -45,32 +45,12 @@ function applyNth(candidate, { is_colors }){
 			const test= t=> name.indexOf(t)===0;
 			if(test(subrules.rule())){
 				const { type, css }= subrules.get(value);
-				if( type.startsWith("media") && (
-					( type==="mediacolor" && is_colors ) || !is_colors
-				))
+				if( type.startsWith("media") && testColorMediaAtRule(type, is_colors) )
 					return css.split(";").reverse().reduce(processCandidate, out);
 
 				if(type!=="before" && type!=="after")
 					return out;
-				content.colors[type]= css.split(";")
-					.reverse().reduce(function(out, rule){
-						if(!rule) return out;
-						const [ name, value ]= ruleCrean(rule);
-						if(filter[type+name]) return out;
-						filter[type+name]= true;
-						if("initial"===value) return out;
-						
-						const test= t=> name.indexOf(t)===0;
-						if(test("content")){
-							content_todo.push(()=> content[type]+=
-								Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
-									.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
-									.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
-									.join(""));
-							return out;
-						}
-						return commonRules(out, test, name, value);
-					}, [ [], [] ]);
+				registerBeforeAndAfter(content, { type, css });
 				return out;
 			}
 			
@@ -110,7 +90,8 @@ function applyNth(candidate, { is_colors }){
 		return margin.left + out + margin.right;
 	};
 	function applyColors(test, colors){
-		if(!colors||!colors.length) return test;
+		if(!colors||!colors.length||!colors[0].length)
+			return test;
 		return `\x1B[${colors[0].join(';')}m` +
 			test +
 			`\x1B[${colors[1].join(';')}m`;
@@ -130,7 +111,29 @@ function applyNth(candidate, { is_colors }){
 			return out;
 		return cssAnsiReducer(out, name+":"+value);
 	}
+	function registerBeforeAndAfter(content, { type, css }){
+		content.colors[type]= css.split(";")
+			.reverse().reduce(function(out, rule){
+				if(!rule) return out;
+				const [ name, value ]= ruleCrean(rule);
+				if(filter[type+name]) return out;
+				filter[type+name]= true;
+				if("initial"===value) return out;
+				
+				const test= t=> name.indexOf(t)===0;
+				if(test("content")){
+					content_todo.push(()=> content[type]+=
+						Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
+							.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
+							.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
+							.join(""));
+					return out;
+				}
+				return commonRules(out, test, name, value);
+			}, [ [], [] ]);
+	}
 }
+function testColorMediaAtRule(type, is_colors){ return ( type==="mediacolor" && is_colors ) || !is_colors; }
 import { ansi_constants } from "./ansi_constants.js";
 function cssAnsiReducer(curr, c){
 	const a= ansi_constants[c];
