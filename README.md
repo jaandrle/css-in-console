@@ -113,6 +113,9 @@ and supports:
 	…in case of terminal the `color` means [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). Meaning, colours and font styling.
 	
 	For original documentation visits [@media - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@media).
+
+	*Note: Experimentaly, you can use `(--terminal-stdout)`/`not (--terminal-stdout)` to style terminal stdout/stderr output differently.
+	Also logical CSS keywords (`and`/`or`) are experimentaly supported. Eg. `@media (color) and (not (--terminal-stdout))…`.*
 	</details>
 - <details> <summary><code>@counter-style</code> — To define specific counter styles that are not part of the predefined set of styles. (<i>expand for more</i>)</summary>
 

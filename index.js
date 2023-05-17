@@ -4,21 +4,21 @@ export function format(...messages){
 import { formatWithOptions as formatWithOptionsNative } from "node:util";
 import { apply } from "./src/css.js";
 export function formatWithOptions(options, ...messages){
-	const { colors: is_colors= true }= options || {};
-	messages= apply(messages, { is_colors });
+	const { colors: is_colors= true, is_stdout= true }= options || {};
+	messages= apply(messages, { is_colors, is_stdout });
 	return formatWithOptionsNative(options, ...messages);
 }
 
 import { log as cLog, error as cError } from "node:console";
 import { usesColors } from "./src/utils.js";
 export default function log(...messages){
-	return cLog(formatWithOptions({ colors: usesColors("stdout") },...messages));
+	return cLog(formatWithOptions({ colors: usesColors("stdout"), is_stdout: true },...messages));
 }
 export { log };
 export const css= style;
 Object.assign(log, { style, css });
 export function error(...messages){
-	return cError(formatWithOptions({ colors: usesColors("stderr") },...messages));
+	return cError(formatWithOptions({ colors: usesColors("stderr"), is_stdout: false },...messages));
 }
 Object.assign(error, { style, css });
 
@@ -29,6 +29,7 @@ import { cssLine } from "./src/css.js";
 import { register as registerCounter } from "./src/counters.js";
 import { unQuoteSemicol } from "./src/utils.js";
 import { add as  addSubrule } from "./src/subrules.js";
+import { customRule } from './src/utils.js';
 export function style(pieces, ...styles_arr){
 	if(Array.isArray(pieces))
 		styles_arr= CSStoLines(String.raw(pieces, styles_arr));
@@ -47,7 +48,7 @@ export function style(pieces, ...styles_arr){
 			if(!subrule_css.startsWith("@media") || !subrule_css.includes("color"))
 				return [];
 			const idx= subrule_css.indexOf("{");
-			const name= subrule_css.slice(0, idx).replace(/[\(\) ]/g, "").slice(1);
+			const name= subrule_css.slice(1, idx).replace(/[\(\)]/g, "").replaceAll(customRule(), "").split(" ").filter(Boolean);
 			const css= style(...CSStoLines(subrule_css.slice(idx+1)));
 			subrule_css= "";
 			return Object.entries(css).slice(1)

@@ -7,7 +7,8 @@ export function rule(...r){
 export function add(name, type, css){
 	const mark= createMark();
 	store.set(mark, { type, css });
-	return [ name, rule(type)+":"+mark+";" ];
+	const rule_str= Array.isArray(type) ? rule(...type) : rule(type);
+	return [ name, rule_str+":"+mark+";" ];
 }
 export function get(mark){
 	return store.get(mark);

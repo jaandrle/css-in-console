@@ -11,7 +11,7 @@ export function cssLine(style){
 		return [ name, css ];
 	});
 }
-export function apply(messages, { is_colors }){
+export function apply(messages, { is_colors, is_stdout }){
 	const out= [];
 	const c= "%c", cr= new RegExp(`(?<!%)(?=${c})`);
 	for(let i=0, { length }= messages; i<length; i++){
@@ -21,7 +21,7 @@ export function apply(messages, { is_colors }){
 		for(let j=0, { length: jl }= ms; j<jl; j++){
 			const msj= ms[j];
 			if(msj.indexOf(c)!==0) continue;
-			ms[j]= applyNth(messages[++i], { is_colors })(msj);
+			ms[j]= applyNth(messages[++i], { is_colors, is_stdout })(msj);
 		}
 		out.push(ms.join(""));
 	}
@@ -29,7 +29,7 @@ export function apply(messages, { is_colors }){
 }
 
 import * as counters from "./counters.js";
-function applyNth(candidate, { is_colors }){
+function applyNth(candidate, { is_colors, is_stdout }){
 	if(typeof candidate !== "string") return m=> m.slice(2);
 	if(candidate.indexOf(":")===-1) return m=> m.slice(2);
 	const filter= {};
@@ -45,7 +45,7 @@ function applyNth(candidate, { is_colors }){
 			const test= t=> name.indexOf(t)===0;
 			if(test(subrules.rule())){
 				const { type, css }= subrules.get(value);
-				if( type.startsWith("media") && testColorMediaAtRule(type, is_colors) )
+				if( type.indexOf("media")===0 && testMediaAtRule(type.slice(1), is_colors, is_stdout) )
 					return css.split(";").reverse().reduce(processCandidate, out);
 
 				if(type!=="before" && type!=="after")
@@ -133,7 +133,22 @@ function applyNth(candidate, { is_colors }){
 			}, [ [], [] ]);
 	}
 }
-function testColorMediaAtRule(type, is_colors){ return ( type==="mediacolor" && is_colors ) || !is_colors; }
+function testMediaAtRule(type, is_colors, is_stdout){
+	let out= false;
+	let is_not= false;
+	for(const item of type){
+		if("not"===item){ is_not= true; continue; }
+		
+		if("and"===item){ if( out) continue; return out; }
+		if( "or"===item){ if(!out) continue; return out; }
+
+		if("color"===item) out= is_not !== is_colors;
+		else if("stdout"===item) out= is_not !== is_stdout;
+		else {}
+		is_not= false;
+	}
+	return out;
+}
 import { ansi_constants } from "./ansi_constants.js";
 function cssAnsiReducer(curr, c){
 	const a= ansi_constants[c];

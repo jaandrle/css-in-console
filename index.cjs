@@ -107,7 +107,8 @@ function rule(...r) {
 function add(name, type, css2) {
   const mark = createMark();
   store.set(mark, { type, css: css2 });
-  return [name, rule(type) + ":" + mark + ";"];
+  const rule_str = Array.isArray(type) ? rule(...type) : rule(type);
+  return [name, rule_str + ":" + mark + ";"];
 }
 function get(mark) {
   return store.get(mark);
@@ -299,7 +300,7 @@ function cssLine(style2) {
     return [name, css2];
   });
 }
-function apply(messages, { is_colors }) {
+function apply(messages, { is_colors, is_stdout }) {
   const out = [];
   const c = "%c", cr = new RegExp(`(?<!%)(?=${c})`);
   for (let i = 0, { length } = messages; i < length; i++) {
@@ -313,13 +314,13 @@ function apply(messages, { is_colors }) {
       const msj = ms[j];
       if (msj.indexOf(c) !== 0)
         continue;
-      ms[j] = applyNth(messages[++i], { is_colors })(msj);
+      ms[j] = applyNth(messages[++i], { is_colors, is_stdout })(msj);
     }
     out.push(ms.join(""));
   }
   return out;
 }
-function applyNth(candidate, { is_colors }) {
+function applyNth(candidate, { is_colors, is_stdout }) {
   if (typeof candidate !== "string")
     return (m) => m.slice(2);
   if (candidate.indexOf(":") === -1)
@@ -336,7 +337,7 @@ function applyNth(candidate, { is_colors }) {
     const test = (t) => name.indexOf(t) === 0;
     if (test(rule())) {
       const { type, css: css2 } = get(value);
-      if (type.startsWith("media") && testColorMediaAtRule(type, is_colors))
+      if (type.indexOf("media") === 0 && testMediaAtRule(type.slice(1), is_colors, is_stdout))
         return css2.split(";").reverse().reduce(processCandidate, out);
       if (type !== "before" && type !== "after")
         return out;
@@ -415,8 +416,33 @@ function applyNth(candidate, { is_colors }) {
     }, [[], []]);
   }
 }
-function testColorMediaAtRule(type, is_colors) {
-  return type === "mediacolor" && is_colors || !is_colors;
+function testMediaAtRule(type, is_colors, is_stdout) {
+  let out = false;
+  let is_not = false;
+  for (const item of type) {
+    if ("not" === item) {
+      is_not = true;
+      continue;
+    }
+    if ("and" === item) {
+      if (out)
+        continue;
+      return out;
+    }
+    if ("or" === item) {
+      if (!out)
+        continue;
+      return out;
+    }
+    if ("color" === item)
+      out = is_not !== is_colors;
+    else if ("stdout" === item)
+      out = is_not !== is_stdout;
+    else {
+    }
+    is_not = false;
+  }
+  return out;
 }
 function cssAnsiReducer(curr, c) {
   const a = ansi_constants[c];
@@ -434,17 +460,17 @@ function format(...messages) {
   return formatWithOptions({}, ...messages);
 }
 function formatWithOptions(options, ...messages) {
-  const { colors: is_colors = true } = options || {};
-  messages = apply(messages, { is_colors });
+  const { colors: is_colors = true, is_stdout = true } = options || {};
+  messages = apply(messages, { is_colors, is_stdout });
   return (0, import_node_util2.formatWithOptions)(options, ...messages);
 }
 function log(...messages) {
-  return (0, import_node_console.log)(formatWithOptions({ colors: usesColors("stdout") }, ...messages));
+  return (0, import_node_console.log)(formatWithOptions({ colors: usesColors("stdout"), is_stdout: true }, ...messages));
 }
 var css = style;
 Object.assign(log, { style, css });
 function error(...messages) {
-  return (0, import_node_console.error)(formatWithOptions({ colors: usesColors("stderr") }, ...messages));
+  return (0, import_node_console.error)(formatWithOptions({ colors: usesColors("stderr"), is_stdout: false }, ...messages));
 }
 Object.assign(error, { style, css });
 function style(pieces, ...styles_arr) {
@@ -466,7 +492,7 @@ function style(pieces, ...styles_arr) {
       if (!subrule_css.startsWith("@media") || !subrule_css.includes("color"))
         return [];
       const idx = subrule_css.indexOf("{");
-      const name = subrule_css.slice(0, idx).replace(/[\(\) ]/g, "").slice(1);
+      const name = subrule_css.slice(1, idx).replace(/[\(\)]/g, "").replaceAll(customRule(), "").split(" ").filter(Boolean);
       const css2 = style(...CSStoLines(subrule_css.slice(idx + 1)));
       subrule_css = "";
       return Object.entries(css2).slice(1).map(([key, css3]) => add(key, name, css3));
