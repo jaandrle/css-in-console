@@ -56,7 +56,7 @@ You can use the `log` and `error` functions to print styled messages to the cons
 log("%cRed text", "color:red");
 error("%cGreen text", "color:green");
 ```
-…or prepare formated text:
+…or prepare formatted text:
 ```javascript
 console.log(format("%cBlue text", "color:blue"));
 console.log(formatWithOptions({ colors: true }, "%cBlue text", "color:blue"));
@@ -66,7 +66,7 @@ The exported functions process the CSS (`%c` expression) in the first step and t
 - `log`/`error` ⇒ [`console.log`](https://nodejs.org/api/console.html#consolelogdata-args)/[`console.error`](https://nodejs.org/api/console.html#consoleerrordata-args)
 - `format`/`formatWithOptions` ⇒ [`util.format`](https://nodejs.org/api/console.html#consoleerrordata-args)/[`util.formatWithOptions`](https://nodejs.org/api/util.html#utilformatwithoptionsinspectoptions-format-args)
 
-> …**Important consequence**: `%c` is processed firstly so indestead of `log("%i%c", 5, "color:red")` you must reorder arguments and so use `log("%i%c", "color:red", 5)`!
+> …**Important consequence**: `%c` is processed firstly so instead of `log("%i%c", 5, "color:red")` you must reorder arguments and so use `log("%i%c", "color:red", 5)`!
 
 ### Defining CSS-like rules
 You can also use the `style`/`css` or `log.style`/`log.css` helpers to prepare styling rules (they are aliases for the same function).
@@ -103,14 +103,14 @@ and supports:
 
 	For original documentation visits [@import - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@import).
 	</details>
-- <details> <summary><code>@media</code> — To provide styles when terminal (not) supports “colours”. (<i>expand for more</i>)</summary>
+- <details> <summary><code>@media</code> — To provide styles when terminal (not) supports “colors”. (<i>expand for more</i>)</summary>
 
 	…so, only `color` is supported:
 	```css
 	@media (color){ … }
 	@media not (color){ … }
 	```
-	…in case of terminal the `color` means [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). Meaning, colours and font styling.
+	…in case of terminal the `color` means [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escape_code). Meaning, colors and font styling.
 	
 	For original documentation visits [@media - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@media).
 
