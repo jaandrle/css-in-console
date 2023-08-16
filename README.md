@@ -18,11 +18,14 @@ log("%cLI (by default %cstarts%c with `- `)",
 );
 ```
 # css-in-console
-`css-in-console` is a library that allows you to apply CSS-like styling to console outputs using TypeScript/JavaScript.
-With this library, you can format text, apply colors, and use various other CSS properties to style your console output.
+`css-in-console` is a library that allows you to style terminal outputs
+in JavaScript/TypeScript code using a CSS-like syntax. Primarily, this can be used
+to apply certain text formatting and its colors. Furthermore, some additional
+CSS structures are also supported (see below).
 
-The library provides extended alternatives to native functions such as `console.log`/`util.format`/….
-For `log`/`error`/`format`/`formatWithOptions` functions, you can use [Styling console output](https://developer.mozilla.org/en-US/docs/Web/API/console#styling_console_output).
+The library offers alternatives to native functions `console.log`/`util.format`/….
+In the exported functions (`log`/`error`/`format`/`formatWithOptions`), you can apply
+styling according to [Styling console output](https://developer.mozilla.org/en-US/docs/Web/API/console#styling_console_output).
 
 ## Installation
 You can install the `css-in-console` library using your favorite package manager.
@@ -33,7 +36,7 @@ For example, with npm:
 npm install css-in-console --save
 ```
 
-If you are OK with only basic styling (no at-rules, …), you can install the 1.x.y version:
+If you are OK with only basic styling (no at-rules, …), you can use the 1.x.y version:
 ```sh
 npm install css-in-console@1 --save
 ```
@@ -41,7 +44,7 @@ npm install css-in-console@1 --save
 
 ## Usage
 
-First, you need to import the required functions and types from the `css-in-console` library:
+First, you need to import the required functions from the `css-in-console` library:
 
 ```javascript
 import { format, formatWithOptions, log, error, style } from 'css-in-console';
@@ -67,6 +70,7 @@ The exported functions process the CSS (`%c` expression) in the first step and t
 - `format`/`formatWithOptions` ⇒ [`util.format`](https://nodejs.org/api/console.html#consoleerrordata-args)/[`util.formatWithOptions`](https://nodejs.org/api/util.html#utilformatwithoptionsinspectoptions-format-args)
 
 > …**Important consequence**: `%c` is processed firstly so instead of `log("%i%c", 5, "color:red")` you must reorder arguments and so use `log("%i%c", "color:red", 5)`!
+> (`log("%i%c", A, B)` ⇒ `console.log("%i★", B)`, where ★ is text with apllied styling or empty depends on `A`)
 
 ### Defining CSS-like rules
 You can also use the `style`/`css` or `log.style`/`log.css` helpers to prepare styling rules (they are aliases for the same function).
@@ -114,8 +118,9 @@ and supports:
 	
 	For original documentation visits [@media - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/@media).
 
-	*Note: Experimentaly, you can use `(--terminal-stdout)`/`not (--terminal-stdout)` to style terminal stdout/stderr output differently.
-	Also logical CSS keywords (`and`/`or`) are experimentaly supported. Eg. `@media (color) and (not (--terminal-stdout))…`.*
+	*Note 1: Experimentaly, you can use `(--terminal-stdout)`/`not (--terminal-stdout)` to style terminal stdout/stderr output differently.*
+	
+	*Note 2: Also logical CSS keywords (`and`/`or`) are experimentaly supported. Eg. `@media (color) and (not (--terminal-stdout))…`.*
 	</details>
 - <details> <summary><code>@counter-style</code> — To define specific counter styles that are not part of the predefined set of styles. (<i>expand for more</i>)</summary>
 
@@ -133,8 +138,9 @@ and supports:
 	```
 
 	You can utilize the `symbols`, `suffix`, `prefix`, `pad`, and `negative`
-	properties in a manner similar to the CSS specification. Additionally,
-	you can specify `system` values of `fixed`, `cyclic`, `numeric`
+	properties in a manner similar to the CSS specification.
+
+	Additionally, you can specify `system` values of `fixed`, `cyclic`, `numeric`
 	and `alphabetic`, just like in CSS. Furthermore, you can use library-specific
 	`--terminal-*` systems such as `--terminal-datetime` (`--terminal-date` and
 	`--terminal-time`) as illustrated in the `list-style` examples below.
@@ -158,7 +164,7 @@ and supports:
 	…you can extend these with `extend` syntax `system: extend --terminal-time;`.
 
 	To utilize `--terminal-*` date and time counters, you can use `--terminal-mask: <symbols> <mask>;`.
-	Symbols contains two characters (firs/secondt represents ‘remove’/‘keep’), see example:
+	Symbols contains two characters (first/second represents ‘remove’/‘keep’), see example:
 	```
 	--terminal-mask: "01" "111111CSS001"
 	```
@@ -213,6 +219,7 @@ As mentioned above, mostly more keywords than syntax.
 - [`counter-reset`](https://developer.mozilla.org/en-US/docs/Web/CSS/counter-reset): only `<counter>`/`<counter> <integer>` values are supported
 
 ## Options under consideration for next release(s)
+- somehow determine dark/light background ⇒ `@media (prefers-color-scheme: dark)` (similarly for `light`)
 - `width`/`text-overflow`/`white-space`
 - `display:block` ⇒ append "\n"?
 - `text-align`
