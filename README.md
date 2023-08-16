@@ -36,7 +36,7 @@ For example, with npm:
 npm install css-in-console --save
 ```
 
-If you are OK with only basic styling (no at-rules, …), you can use the 1.x.y version:
+If you are OK with only basic styling (no at-rules, …), you can use the [1.x.y version](https://github.com/jaandrle/css-in-console/tree/v1):
 ```sh
 npm install css-in-console@1 --save
 ```
