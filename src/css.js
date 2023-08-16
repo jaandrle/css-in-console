@@ -124,6 +124,8 @@ function applyNth(candidate, { is_colors, is_stdout }){
 				if(test("content")){
 					content_todo.push(()=> content[type]+=
 						Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
+							// detect string literals (inside quotes) and used counters (`counter(…)`)
+							// ↘ idea: `"string " counter(decimal)` ⇒ `[ "string ", "deciaml" ]` ⇒ "string 1"
 							.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
 							.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
 							.join(""));

@@ -206,7 +206,7 @@ As mentioned above, mostly more keywords than syntax.
 - `font-weight: bold` {★}
 - `text-decoration: underline|line-through` {★}
 - `animation: blink` {★}
-- `tab-size: <number>` {!::}: all tabs will be replaced with given number of spaces (default: 2)
+- `tab-size: <number>` {!::}: all tabs will be replaced with given number of spaces (default: 7)
 - `display: none` {★}
 - `display: list-item` {!::}: basic implementation of [list-style-type - CSS: Cascading Style Sheets | MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/list-style-type)
 	- `list-style-type: "<string>"`: defaults to `"- "`
