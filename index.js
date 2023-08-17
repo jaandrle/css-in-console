@@ -1,45 +1,69 @@
-import { usesColors, unQuoteSemicol } from "./src/utils.js";
-import { apply, cssLine } from "./src/css.js";
-
-import { formatWithOptions as formatWithOptionsNative } from "node:util";
 export function format(...messages){
 	return formatWithOptions({}, ...messages);
 }
+import { formatWithOptions as formatWithOptionsNative } from "node:util";
+import { apply } from "./src/css.js";
 export function formatWithOptions(options, ...messages){
-	const { colors: is_colors= true }= options || {};
-	messages= apply(messages, { is_colors });
+	const { colors: is_colors= true, is_stdout= true }= options || {};
+	messages= apply(messages, { is_colors, is_stdout });
 	return formatWithOptionsNative(options, ...messages);
 }
 
-export const css= style;
 import { log as cLog, error as cError } from "node:console";
-import { argv } from 'node:process';
+import { usesColors } from "./src/utils.js";
 export default function log(...messages){
-	return cLog(formatWithOptions({ colors: usesColors("stdout") },...messages));
+	return cLog(formatWithOptions({ colors: usesColors("stdout"), is_stdout: true },...messages));
 }
-Object.assign(log, { style, css });
 export { log };
+export const css= style;
+Object.assign(log, { style, css });
 export function error(...messages){
-	return cError(formatWithOptions({ colors: usesColors("stderr") },...messages));
+	return cError(formatWithOptions({ colors: usesColors("stderr"), is_stdout: false },...messages));
 }
 Object.assign(error, { style, css });
 
+import { argv } from 'node:process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { cssLine } from "./src/css.js";
+import { register as registerCounter } from "./src/counters.js";
+import { unQuoteSemicol } from "./src/utils.js";
+import { add as  addSubrule } from "./src/subrules.js";
+import { customRule } from './src/utils.js';
 export function style(pieces, ...styles_arr){
 	if(Array.isArray(pieces))
 		styles_arr= CSStoLines(String.raw(pieces, styles_arr));
 	else
 		styles_arr.unshift(pieces);
 	const out= { unset: "unset:all" };
-	let all= "";
-	const styles_preprocessed= styles_arr.flatMap(function(style){
-		style= style.trim();
-		if(!style) return [];
+	let all= "", subrule_css= "";
+	const styles_preprocessed= styles_arr.flatMap(function(style_nth){
+		style_nth= style_nth.trim();
+		if(!style_nth) return [];
+		if(subrule_css){
+			if(style_nth!=="}"){
+				subrule_css+= style_nth;
+				return [];
+			}
+			if(!subrule_css.startsWith("@media") || !subrule_css.includes("color"))
+				return [];
+			const idx= subrule_css.indexOf("{");
+			const name= subrule_css.slice(1, idx).replace(/[\(\)]/g, "").replaceAll(customRule(), "").split(" ").filter(Boolean);
+			const css= style(...CSStoLines(subrule_css.slice(idx+1)));
+			subrule_css= "";
+			return Object.entries(css).slice(1)
+				.map(([ key, css ])=> addSubrule(key, name, css));
+		}
 
-		if(style[0]==="@"){
-			if(style.indexOf("@import")!==0) return [];
-			let url= unQuoteSemicol(style.slice(7)).value;
+		if(style_nth[0]==="@"){
+			if(style_nth.indexOf("@import")!==0){
+				if(style_nth.indexOf("@counter-style")===0)
+					registerCounter(style_nth);
+				else
+					subrule_css+= style_nth;
+				return [];
+			}
+			let url= unQuoteSemicol(style_nth.slice(7)).value;
 			if(url[0]===".") url= resolve(argv[1], "..", url);
 			try{
 				return CSStoLines(readFileSync(url, { encoding: "utf-8" }).toString())
@@ -48,7 +72,7 @@ export function style(pieces, ...styles_arr){
 				throw new Error(`Unable to import file ${url}: ${error.message}`);
 			}
 		}
-		return cssLine(style);
+		return cssLine(style_nth);
 	});
 	for(const [ name, css ] of styles_preprocessed){
 		if(name==="*"){

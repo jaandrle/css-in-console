@@ -1,18 +1,17 @@
-import { customRule, ruleCrean, unQuoteSemicol } from "./utils.js";
+import { ruleCrean, unQuoteSemicol } from "./utils.js";
+import * as subrules from "./subrules.js";
 export function cssLine(style){
 	let [ name_candidate, css ]= style.replace("}","").split("{").map(v=> v.trim());
 	name_candidate= name_candidate.replaceAll(/[\.#]/g, "");
 	return name_candidate.split(",").map(name=> {
 		let pseudo;
 		[ name, pseudo ]= name.split(/:?:/).map(v=> v.trim());
-		if(pseudo) css= css
-			.replaceAll(new RegExp(customRule("content")+"-(before|after)", "g"), "content")
-			.replaceAll("content", customRule("content", pseudo));
+		if(pseudo) return subrules.add(name, pseudo, css);
 		if(css[css.length-1]!==";") css+= ";";
 		return [ name, css ];
 	});
 }
-export function apply(messages, { is_colors }){
+export function apply(messages, { is_colors, is_stdout }){
 	const out= [];
 	const c= "%c", cr= new RegExp(`(?<!%)(?=${c})`);
 	for(let i=0, { length }= messages; i<length; i++){
@@ -22,28 +21,43 @@ export function apply(messages, { is_colors }){
 		for(let j=0, { length: jl }= ms; j<jl; j++){
 			const msj= ms[j];
 			if(msj.indexOf(c)!==0) continue;
-			ms[j]= applyNth(messages[++i], { is_colors })(msj);
+			ms[j]= applyNth(messages[++i], { is_colors, is_stdout })(msj);
 		}
 		out.push(ms.join(""));
 	}
 	return out;
 }
 
-function applyNth(candidate, { is_colors }){
+import * as counters from "./counters.js";
+function applyNth(candidate, { is_colors, is_stdout }){
 	if(typeof candidate !== "string") return m=> m.slice(2);
 	if(candidate.indexOf(":")===-1) return m=> m.slice(2);
 	const filter= {};
 	const margin= { left: "", right: "" };
-	const content= { before: "", after: "" };
+	const content= { before: "", after: "", colors: {} };
+	const content_todo= [];
 	let tab_size= 7;
 	const colors= candidate.split(";")
-		.reverse().reduce(function(out, rule){
+		.reverse().reduce(function processCandidate(out, rule){
 			if(!rule) return out;
 			const [ name, value ]= ruleCrean(rule);
-			if(filter[name]) return out;
-			filter[name]= true;
 			
 			const test= t=> name.indexOf(t)===0;
+			if(test(subrules.rule())){
+				const { type, css }= subrules.get(value);
+				if( type.indexOf("media")===0 && testMediaAtRule(type.slice(1), is_colors, is_stdout) )
+					return css.split(";").reverse().reduce(processCandidate, out);
+
+				if(type!=="before" && type!=="after")
+					return out;
+				registerBeforeAndAfter(content, { type, css });
+				return out;
+			}
+			
+			if(filter[name]) return out;
+			filter[name]= true;
+			if("initial"===value) return out;
+			
 			if(test("padding") || test("margin")){
 				margin[name.split("-")[1].trim()]= " ".repeat(parseInt(value));
 				return out;
@@ -53,11 +67,11 @@ function applyNth(candidate, { is_colors }){
 				return out;
 			}
 			if(test("list-style")){
-				content.before= unQuoteSemicol(value).value + content.before;
-				return out;
-			}
-			if(test(customRule("content"))){
-				content[name.slice(name.lastIndexOf("-")+1)]+= unQuoteSemicol(value).value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\");
+				const { has_quotes, value: style_name }= unQuoteSemicol(value);
+				if(has_quotes)
+					content.before= style_name + content.before;
+				else if(counters.has(style_name))
+					content.before= counters.get(style_name) + content.before;
 				return out;
 			}
 			if(test("display")&&value==="list-item"){
@@ -65,22 +79,77 @@ function applyNth(candidate, { is_colors }){
 					content.before= "- " + content.before;
 				return out;
 			}
-			if(!is_colors)
-				return out;
-			return cssAnsiReducer(out, name+":"+value);
+			return commonRules(out, test, name, value);
 		}, [ [], [] ]);
+	content_todo.forEach(f=> f());
 	return function(match){
-		let out= 
-			content.before +
-			match.slice(2).replaceAll("\t", " ".repeat(tab_size)) +
-			content.after;
-		if(colors[0].length)
-			out=
-				`\x1B[${colors[0].join(';')}m` +
-				out +
-				`\x1B[${colors[1].join(';')}m`;
+		const out= 
+			applyColors(content.before, content.colors.before || colors) +
+			applyColors(match.slice(2).replaceAll("\t", " ".repeat(tab_size)), colors) +
+			applyColors(content.after, content.colors.after || colors);
 		return margin.left + out + margin.right;
 	};
+	function applyColors(test, colors){
+		if(!colors||!colors.length||!colors[0].length)
+			return test;
+		return `\x1B[${colors[0].join(';')}m` +
+			test +
+			`\x1B[${colors[1].join(';')}m`;
+	}
+	function commonRules(out, test, name, value){
+		if(test("counter-reset")){
+			const [c, v]= value.split(" ");
+			counters.counterReset(c, Number(v));
+			return out;
+		}
+		if(test("counter-increment")){
+			const [c, v]= value.split(" ");
+			content_todo.unshift(()=> counters.counterIncrement(c, Number(v)));
+			return out;
+		}
+		if(!is_colors)
+			return out;
+		return cssAnsiReducer(out, name+":"+value);
+	}
+	function registerBeforeAndAfter(content, { type, css }){
+		content.colors[type]= css.split(";")
+			.reverse().reduce(function(out, rule){
+				if(!rule) return out;
+				const [ name, value ]= ruleCrean(rule);
+				if(filter[type+name]) return out;
+				filter[type+name]= true;
+				if("initial"===value) return out;
+				
+				const test= t=> name.indexOf(t)===0;
+				if(test("content")){
+					content_todo.push(()=> content[type]+=
+						Array.from(value.replaceAll(/\\(?!\\)/g, "").replaceAll("\\\\", "\\")
+							// detect string literals (inside quotes) and used counters (`counter(…)`)
+							// ↘ idea: `"string " counter(decimal)` ⇒ `[ "string ", "deciaml" ]` ⇒ "string 1"
+							.matchAll(/((['"])(?<q>(?:(?!\2)[^\\]|\\[\s\S])*)\2|counter\((?<c>[^,\)]*),? ?(?<cs>[^\)]*)\))/g))
+							.map(({ groups: { q, c, cs } })=> typeof q==="undefined" ? counters.counterFunction(c, cs) : q)
+							.join(""));
+					return out;
+				}
+				return commonRules(out, test, name, value);
+			}, [ [], [] ]);
+	}
+}
+function testMediaAtRule(type, is_colors, is_stdout){
+	let out= false;
+	let is_not= false;
+	for(const item of type){
+		if("not"===item){ is_not= true; continue; }
+		
+		if("and"===item){ if( out) continue; return out; }
+		if( "or"===item){ if(!out) continue; return out; }
+
+		if("color"===item) out= is_not !== is_colors;
+		else if("stdout"===item) out= is_not !== is_stdout;
+		else {}
+		is_not= false;
+	}
+	return out;
 }
 import { ansi_constants } from "./ansi_constants.js";
 function cssAnsiReducer(curr, c){
