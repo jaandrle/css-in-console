@@ -2,15 +2,15 @@ export function format(...messages){
 	return formatWithOptions({}, ...messages);
 }
 import { formatWithOptions as formatWithOptionsNative } from "node:util";
+import { usesColors, use256Colors } from "./src/utils.js";
 import { apply } from "./src/css.js";
 export function formatWithOptions(options, ...messages){
-	const { colors: is_colors= true, is_stdout= true }= options || {};
-	messages= apply(messages, { is_colors, is_stdout });
+	const { colors: is_colors= usesColors("stdout"), is_rgb= use256Colors(), is_stdout= true }= options || {};
+	messages= apply(messages, { is_colors, is_rgb, is_stdout });
 	return formatWithOptionsNative(options, ...messages);
 }
 
 import { log as cLog, error as cError } from "node:console";
-import { usesColors } from "./src/utils.js";
 export default function log(...messages){
 	return cLog(formatWithOptions({ colors: usesColors("stdout"), is_stdout: true },...messages));
 }

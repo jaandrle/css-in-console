@@ -1,7 +1,7 @@
 export function createMark(){ return Math.random().toString().slice(2); }
 export function customRule(...rule){ return "--terminal-"+rule.join("-"); }
 /** @param {"stderr"|"stdout"} target */
-	export function usesColors(target){//?also levels, see supports-color, and ?$.isFIFO
+export function usesColors(target){//?also levels, see supports-color, and ?$.isFIFO
 	if("FORCE_COLORS" in process.env){
 		const { FORCE_COLORS: f }= process.env;
 		if(f==="false"||f==="0") return false;
@@ -9,6 +9,13 @@ export function customRule(...rule){ return "--terminal-"+rule.join("-"); }
 	}
 	const { hasColors= ()=> false }= process[target];
 	return hasColors();
+}
+let is256Colors;
+export function use256Colors(){
+	if(is256Colors!==undefined) return is256Colors;
+	const is= "TERM" in process.env ? process.env.TERM.endsWith("256color") : false;
+	is256Colors= is;
+	return is;
 }
 /**
  * @param {string} s
