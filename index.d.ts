@@ -1,4 +1,14 @@
-export type css_colors= "black" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "lightred" | "lightgreen" | "lightyellow" | "lightblue" | "lightmagenta" | "lightcyan" | "whitesmoke";
+/**
+ * The `rgb(…)` is used in enviroment with `$TERM` sets to `xterm-256color`.
+ * You can leverage of the CSS fallback property, to sets the fallback color:
+ * ```JavaScript
+ * log.css`
+ *	.red_with_fallback { color: red; color: rgb(190 90 90); }
+ * `;
+ * ```
+ * */
+export type css_rgb= `rgb(${number} ${number} ${number})` | `rgb(${number}, ${number}, ${number})`;
+export type css_colors= css_rgb | "black" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "lightred" | "lightgreen" | "lightyellow" | "lightblue" | "lightmagenta" | "lightcyan" | "whitesmoke";
 export type css_rules=
 	  `@import "${string}"`
 	| "unset: all;"
