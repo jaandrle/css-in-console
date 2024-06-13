@@ -1,19 +1,14 @@
-export type css_colors= "black" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "lightred" | "lightgreen" | "lightyellow" | "lightblue" | "lightmagenta" | "lightcyan" | "whitesmoke";
 /**
- * - `color: COLOR` – see {@link css_colors}
- * - `background: COLOR` – see {@link css_colors}
- * - `margin-left: NUMBER` – counts spaces before string
- * - `margin-right: NUMBER` – counts spaces after string
- * - `font-style: italic`
- * - `font-weight: bold`
- * - `text-decoration: underline|line-through`
- * - `display: none|list-item`
- * - `list-style-type: "…"` – to be used for `display:list-item` (default: `"- "`)
- * - `animation:blink`
- * - `content: "…"` – allowed only for pseudo selectors `::before`/`::after`
- * - `@import "…"` – to import styles from css file, not supported recursive importing ⇒ can be used only in JavaScript function {@link style}
- * - `tab-size: NUMBER` – all tabs will be replaced with given number of spaces (default: 2)
-*/
+ * The `rgb(…)` is used in enviroment with `$TERM` sets to `xterm-256color`.
+ * You can leverage of the CSS fallback property, to sets the fallback color:
+ * ```JavaScript
+ * log.css`
+ *	.red_with_fallback { color: red; color: rgb(190 90 90); }
+ * `;
+ * ```
+ * */
+export type css_rgb= `rgb(${number} ${number} ${number})` | `rgb(${number}, ${number}, ${number})`;
+export type css_colors= css_rgb | "black" | "red" | "green" | "yellow" | "blue" | "magenta" | "cyan" | "white" | "gray" | "lightred" | "lightgreen" | "lightyellow" | "lightblue" | "lightmagenta" | "lightcyan" | "whitesmoke";
 export type css_rules=
 	  `@import "${string}"`
 	| "unset: all;"
