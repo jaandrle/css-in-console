@@ -1,4 +1,4 @@
-import { usesColors, unQuoteSemicol } from "./src/utils.js";
+import { usesColors, use256Colors, unQuoteSemicol } from "./src/utils.js";
 import { apply, cssLine } from "./src/css.js";
 
 import { formatWithOptions as formatWithOptionsNative } from "node:util";
@@ -6,7 +6,7 @@ export function format(...messages){
 	return formatWithOptions({}, ...messages);
 }
 export function formatWithOptions(options, ...messages){
-	const { colors: is_colors= true }= options || {};
+	const { colors: is_colors= true, is_rgb= use256Colors() }= options || {};
 	messages= apply(messages, { is_colors });
 	return formatWithOptionsNative(options, ...messages);
 }

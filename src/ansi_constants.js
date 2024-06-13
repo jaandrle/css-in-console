@@ -29,6 +29,8 @@ export const ansi_constants= {
 	"color:lightcyan": s.cyanBright,
 	"color:whitesmoke": s.whiteBright,
 	
+	"color:rgb": [ "38;2;", "0" ],
+	
 	"background:black": s.bgBlack,
 	"background:red": s.bgRed,
 	"background:green": s.bgGreen,
@@ -44,7 +46,9 @@ export const ansi_constants= {
 	"background:lightblue": s.bgBlueBright,
 	"background:lightmagenta": s.bgMagentaBright,
 	"background:lightcyan": s.bgCyanBright,
-	"background:whitesmoke": s.bgEsmokeBright
+	"background:whitesmoke": s.bgEsmokeBright,
+
+	"background:rgb": [ "48;2;", "0" ],
 
 	/* Special cases (see `applyNth` function):
 	 * margin-*

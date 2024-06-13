@@ -9,6 +9,13 @@ export function usesColors(target){//?also levels, see supports-color, and ?$.is
 	const { hasColors= ()=> false }= process[target];
 	return hasColors();
 }
+let is256Colors;
+export function use256Colors(){
+	if(is256Colors!==undefined) return is256Colors;
+	const is= "TERM" in process.env ? process.env.TERM.endsWith("256color") : false;
+	is256Colors= is;
+	return is;
+}
 /**
  * @param {string} s
  * @returns {{ value: string, has_quotes: boolean }}
