@@ -17,8 +17,8 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // index.js
-var v1_dev_rgb_exports = {};
-__export(v1_dev_rgb_exports, {
+var css_in_console_exports = {};
+__export(css_in_console_exports, {
   css: () => css,
   default: () => log,
   error: () => error,
@@ -27,7 +27,7 @@ __export(v1_dev_rgb_exports, {
   log: () => log,
   style: () => style
 });
-module.exports = __toCommonJS(v1_dev_rgb_exports);
+module.exports = __toCommonJS(css_in_console_exports);
 
 // src/utils.js
 function customRule(...rule) {
