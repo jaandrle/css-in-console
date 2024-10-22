@@ -43,6 +43,14 @@ function usesColors(target) {
   const { hasColors = () => false } = process[target];
   return hasColors();
 }
+var is256Colors;
+function use256Colors() {
+  if (is256Colors !== void 0)
+    return is256Colors;
+  const is = "TERM" in process.env ? process.env.TERM.endsWith("256color") : false;
+  is256Colors = is;
+  return is;
+}
 function unQuoteSemicol(s2) {
   s2 = s2.trim();
   if (s2[s2.length - 1] === ";")
@@ -87,6 +95,7 @@ var ansi_constants = {
   "color:lightmagenta": s.magentaBright,
   "color:lightcyan": s.cyanBright,
   "color:whitesmoke": s.whiteBright,
+  "color:rgb": ["38;2;", "0"],
   "background:black": s.bgBlack,
   "background:red": s.bgRed,
   "background:green": s.bgGreen,
@@ -102,7 +111,8 @@ var ansi_constants = {
   "background:lightblue": s.bgBlueBright,
   "background:lightmagenta": s.bgMagentaBright,
   "background:lightcyan": s.bgCyanBright,
-  "background:whitesmoke": s.bgEsmokeBright
+  "background:whitesmoke": s.bgEsmokeBright,
+  "background:rgb": ["48;2;", "0"]
   /* Special cases (see `applyNth` function):
    * margin-*
    * padding-* (for now? alias for margin-*)
@@ -126,7 +136,7 @@ function cssLine(style2) {
     return [name, css2];
   });
 }
-function apply(messages, { is_colors }) {
+function apply(messages, { is_colors, is_rgb }) {
   const out = [];
   const c = "%c", cr = new RegExp(`(?<!%)(?=${c})`);
   for (let i = 0, { length } = messages; i < length; i++) {
@@ -140,13 +150,13 @@ function apply(messages, { is_colors }) {
       const msj = ms[j];
       if (msj.indexOf(c) !== 0)
         continue;
-      ms[j] = applyNth(messages[++i], { is_colors })(msj);
+      ms[j] = applyNth(messages[++i], { is_colors, is_rgb })(msj);
     }
     out.push(ms.join(""));
   }
   return out;
 }
-function applyNth(candidate, { is_colors }) {
+function applyNth(candidate, { is_colors, is_rgb }) {
   if (typeof candidate !== "string")
     return (m) => m.slice(2);
   if (candidate.indexOf(":") === -1)
@@ -186,7 +196,12 @@ function applyNth(candidate, { is_colors }) {
     }
     if (!is_colors)
       return out;
-    return cssAnsiReducer(out, name + ":" + value);
+    if (!value.startsWith("rgb("))
+      return cssAnsiReducer(out, name + ":" + value);
+    if (is_rgb)
+      return cssAnsiReducer(out, name + ":rgb", value.slice(4, -1).replace(/(, *| +)/g, ";"));
+    Reflect.deleteProperty(filter, name);
+    return out;
   }, [[], []]);
   return function(match) {
     let out = content.before + match.slice(2).replaceAll("	", " ".repeat(tab_size)) + content.after;
@@ -195,10 +210,11 @@ function applyNth(candidate, { is_colors }) {
     return margin.left + out + margin.right;
   };
 }
-function cssAnsiReducer(curr, c) {
+function cssAnsiReducer(curr, c, value = "") {
+  value = [value, ""];
   const a = ansi_constants[c];
   if (a)
-    curr.forEach((c2, i) => c2.push(a[i]));
+    curr.forEach((c2, i) => c2.push(a[i] + value[i]));
   return curr;
 }
 
@@ -212,8 +228,8 @@ function format(...messages) {
   return formatWithOptions({}, ...messages);
 }
 function formatWithOptions(options, ...messages) {
-  const { colors: is_colors = true } = options || {};
-  messages = apply(messages, { is_colors });
+  const { colors: is_colors = true, is_rgb = use256Colors() } = options || {};
+  messages = apply(messages, { is_colors, is_rgb });
   return (0, import_node_util2.formatWithOptions)(options, ...messages);
 }
 var css = style;

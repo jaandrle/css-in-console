@@ -15,6 +15,7 @@
 
 ### Type Aliases
 
+- [css\_rgb](README.md#css_rgb)
 - [css\_colors](README.md#css_colors)
 - [css\_rules](README.md#css_rules)
 - [cssTemplate](README.md#csstemplate)
@@ -107,7 +108,7 @@ const css= style("@import './file.css'");
 
 | Name | Type |
 | :------ | :------ |
-| `...styles` | (\`.${string}{ @import "${string}" }\` \| \`.${string}{ display: none; }\` \| \`.${string}{ display: list-item; }\` \| \`.${string}{ color: black; }\` \| \`.${string}{ color: red; }\` \| \`.${string}{ color: green; }\` \| \`.${string}{ color: yellow; }\` \| \`.${string}{ color: blue; }\` \| \`.${string}{ color: magenta; }\` \| \`.${string}{ color: cyan; }\` \| \`.${string}{ color: white; }\` \| \`.${string}{ color: gray; }\` \| \`.${string}{ color: lightred; }\` \| \`.${string}{ color: lightgreen; }\` \| \`.${string}{ color: lightyellow; }\` \| \`.${string}{ color: lightblue; }\` \| \`.${string}{ color: lightmagenta; }\` \| \`.${string}{ color: lightcyan; }\` \| \`.${string}{ color: whitesmoke; }\` \| \`.${string}{ background: black; }\` \| \`.${string}{ background: red; }\` \| \`.${string}{ background: green; }\` \| \`.${string}{ background: yellow; }\` \| \`.${string}{ background: blue; }\` \| \`.${string}{ background: magenta; }\` \| \`.${string}{ background: cyan; }\` \| \`.${string}{ background: white; }\` \| \`.${string}{ background: gray; }\` \| \`.${string}{ background: lightred; }\` \| \`.${string}{ background: lightgreen; }\` \| \`.${string}{ background: lightyellow; }\` \| \`.${string}{ background: lightblue; }\` \| \`.${string}{ background: lightmagenta; }\` \| \`.${string}{ background: lightcyan; }\` \| \`.${string}{ background: whitesmoke; }\` \| \`.${string}{ margin-left: ${number}; }\` \| \`.${string}{ margin-right: ${number}; }\` \| \`.${string}{ text-decoration: underline }\` \| \`.${string}{ text-decoration: line-through }\` \| \`.${string}{ list-style-type: ${string} }\` \| \`.${string}{ unset: all; }\` \| \`.${string}{ font-style: italic; }\` \| \`.${string}{ font-weight: bold; }\` \| \`.${string}{ animation: blink; }\`)[] |
+| `...styles` | (\`.${string}{ @import "${string}" }\` \| \`.${string}{ display: none; }\` \| \`.${string}{ display: list-item; }\` \| \`.${string}{ color: rgb(${number} ${number} ${number}); }\` \| \`.${string}{ color: rgb(${number}, ${number}, ${number}); }\` \| \`.${string}{ color: black; }\` \| \`.${string}{ color: red; }\` \| \`.${string}{ color: green; }\` \| \`.${string}{ color: yellow; }\` \| \`.${string}{ color: blue; }\` \| \`.${string}{ color: magenta; }\` \| \`.${string}{ color: cyan; }\` \| \`.${string}{ color: white; }\` \| \`.${string}{ color: gray; }\` \| \`.${string}{ color: lightred; }\` \| \`.${string}{ color: lightgreen; }\` \| \`.${string}{ color: lightyellow; }\` \| \`.${string}{ color: lightblue; }\` \| \`.${string}{ color: lightmagenta; }\` \| \`.${string}{ color: lightcyan; }\` \| \`.${string}{ color: whitesmoke; }\` \| \`.${string}{ background: rgb(${number} ${number} ${number}); }\` \| \`.${string}{ background: rgb(${number}, ${number}, ${number}); }\` \| \`.${string}{ background: black; }\` \| \`.${string}{ background: red; }\` \| \`.${string}{ background: green; }\` \| \`.${string}{ background: yellow; }\` \| \`.${string}{ background: blue; }\` \| \`.${string}{ background: magenta; }\` \| \`.${string}{ background: cyan; }\` \| \`.${string}{ background: white; }\` \| \`.${string}{ background: gray; }\` \| \`.${string}{ background: lightred; }\` \| \`.${string}{ background: lightgreen; }\` \| \`.${string}{ background: lightyellow; }\` \| \`.${string}{ background: lightblue; }\` \| \`.${string}{ background: lightmagenta; }\` \| \`.${string}{ background: lightcyan; }\` \| \`.${string}{ background: whitesmoke; }\` \| \`.${string}{ margin-left: ${number}; }\` \| \`.${string}{ margin-right: ${number}; }\` \| \`.${string}{ text-decoration: underline }\` \| \`.${string}{ text-decoration: line-through }\` \| \`.${string}{ list-style-type: ${string} }\` \| \`.${string}{ unset: all; }\` \| \`.${string}{ font-style: italic; }\` \| \`.${string}{ font-weight: bold; }\` \| \`.${string}{ animation: blink; }\`)[] |
 
 #### Returns
 
@@ -221,7 +222,7 @@ const c= css`
 
 | Name | Type |
 | :------ | :------ |
-| `...styles` | (\`.${string}{ @import "${string}" }\` \| \`.${string}{ display: none; }\` \| \`.${string}{ display: list-item; }\` \| \`.${string}{ color: black; }\` \| \`.${string}{ color: red; }\` \| \`.${string}{ color: green; }\` \| \`.${string}{ color: yellow; }\` \| \`.${string}{ color: blue; }\` \| \`.${string}{ color: magenta; }\` \| \`.${string}{ color: cyan; }\` \| \`.${string}{ color: white; }\` \| \`.${string}{ color: gray; }\` \| \`.${string}{ color: lightred; }\` \| \`.${string}{ color: lightgreen; }\` \| \`.${string}{ color: lightyellow; }\` \| \`.${string}{ color: lightblue; }\` \| \`.${string}{ color: lightmagenta; }\` \| \`.${string}{ color: lightcyan; }\` \| \`.${string}{ color: whitesmoke; }\` \| \`.${string}{ background: black; }\` \| \`.${string}{ background: red; }\` \| \`.${string}{ background: green; }\` \| \`.${string}{ background: yellow; }\` \| \`.${string}{ background: blue; }\` \| \`.${string}{ background: magenta; }\` \| \`.${string}{ background: cyan; }\` \| \`.${string}{ background: white; }\` \| \`.${string}{ background: gray; }\` \| \`.${string}{ background: lightred; }\` \| \`.${string}{ background: lightgreen; }\` \| \`.${string}{ background: lightyellow; }\` \| \`.${string}{ background: lightblue; }\` \| \`.${string}{ background: lightmagenta; }\` \| \`.${string}{ background: lightcyan; }\` \| \`.${string}{ background: whitesmoke; }\` \| \`.${string}{ margin-left: ${number}; }\` \| \`.${string}{ margin-right: ${number}; }\` \| \`.${string}{ text-decoration: underline }\` \| \`.${string}{ text-decoration: line-through }\` \| \`.${string}{ list-style-type: ${string} }\` \| \`.${string}{ unset: all; }\` \| \`.${string}{ font-style: italic; }\` \| \`.${string}{ font-weight: bold; }\` \| \`.${string}{ animation: blink; }\`)[] |
+| `...styles` | (\`.${string}{ @import "${string}" }\` \| \`.${string}{ display: none; }\` \| \`.${string}{ display: list-item; }\` \| \`.${string}{ color: rgb(${number} ${number} ${number}); }\` \| \`.${string}{ color: rgb(${number}, ${number}, ${number}); }\` \| \`.${string}{ color: black; }\` \| \`.${string}{ color: red; }\` \| \`.${string}{ color: green; }\` \| \`.${string}{ color: yellow; }\` \| \`.${string}{ color: blue; }\` \| \`.${string}{ color: magenta; }\` \| \`.${string}{ color: cyan; }\` \| \`.${string}{ color: white; }\` \| \`.${string}{ color: gray; }\` \| \`.${string}{ color: lightred; }\` \| \`.${string}{ color: lightgreen; }\` \| \`.${string}{ color: lightyellow; }\` \| \`.${string}{ color: lightblue; }\` \| \`.${string}{ color: lightmagenta; }\` \| \`.${string}{ color: lightcyan; }\` \| \`.${string}{ color: whitesmoke; }\` \| \`.${string}{ background: rgb(${number} ${number} ${number}); }\` \| \`.${string}{ background: rgb(${number}, ${number}, ${number}); }\` \| \`.${string}{ background: black; }\` \| \`.${string}{ background: red; }\` \| \`.${string}{ background: green; }\` \| \`.${string}{ background: yellow; }\` \| \`.${string}{ background: blue; }\` \| \`.${string}{ background: magenta; }\` \| \`.${string}{ background: cyan; }\` \| \`.${string}{ background: white; }\` \| \`.${string}{ background: gray; }\` \| \`.${string}{ background: lightred; }\` \| \`.${string}{ background: lightgreen; }\` \| \`.${string}{ background: lightyellow; }\` \| \`.${string}{ background: lightblue; }\` \| \`.${string}{ background: lightmagenta; }\` \| \`.${string}{ background: lightcyan; }\` \| \`.${string}{ background: whitesmoke; }\` \| \`.${string}{ margin-left: ${number}; }\` \| \`.${string}{ margin-right: ${number}; }\` \| \`.${string}{ text-decoration: underline }\` \| \`.${string}{ text-decoration: line-through }\` \| \`.${string}{ list-style-type: ${string} }\` \| \`.${string}{ unset: all; }\` \| \`.${string}{ font-style: italic; }\` \| \`.${string}{ font-weight: bold; }\` \| \`.${string}{ animation: blink; }\`)[] |
 
 #### Returns
 
@@ -251,29 +252,29 @@ const c= css`
 
 ## Type Aliases
 
+### css\_rgb
+
+Ƭ **css\_rgb**: \`rgb(${number} ${number} ${number})\` \| \`rgb(${number}, ${number}, ${number})\`
+
+The `rgb(…)` is used in enviroment with `$TERM` sets to `xterm-256color`.
+You can leverage of the CSS fallback property, to sets the fallback color:
+```JavaScript
+log.css`
+	.red_with_fallback { color: red; color: rgb(190 90 90); }
+`;
+```
+
+___
+
 ### css\_colors
 
-Ƭ **css\_colors**: ``"black"`` \| ``"red"`` \| ``"green"`` \| ``"yellow"`` \| ``"blue"`` \| ``"magenta"`` \| ``"cyan"`` \| ``"white"`` \| ``"gray"`` \| ``"lightred"`` \| ``"lightgreen"`` \| ``"lightyellow"`` \| ``"lightblue"`` \| ``"lightmagenta"`` \| ``"lightcyan"`` \| ``"whitesmoke"``
+Ƭ **css\_colors**: [`css_rgb`](README.md#css_rgb) \| ``"black"`` \| ``"red"`` \| ``"green"`` \| ``"yellow"`` \| ``"blue"`` \| ``"magenta"`` \| ``"cyan"`` \| ``"white"`` \| ``"gray"`` \| ``"lightred"`` \| ``"lightgreen"`` \| ``"lightyellow"`` \| ``"lightblue"`` \| ``"lightmagenta"`` \| ``"lightcyan"`` \| ``"whitesmoke"``
 
 ___
 
 ### css\_rules
 
 Ƭ **css\_rules**: \`@import "${string}"\` \| ``"unset: all;"`` \| \`display: ${"none" \| "list-item"};\` \| \`color: ${css\_colors};\` \| \`background: ${css\_colors};\` \| \`margin-${"left" \| "right"}: ${number};\` \| ``"font-style: italic;"`` \| ``"font-weight: bold;"`` \| \`text-decoration: ${"underline" \| "line-through"}\` \| \`list-style-type: ${string}\` \| ``"animation: blink;"``
-
-- `color: COLOR` – see [css_colors](README.md#css_colors)
-- `background: COLOR` – see [css_colors](README.md#css_colors)
-- `margin-left: NUMBER` – counts spaces before string
-- `margin-right: NUMBER` – counts spaces after string
-- `font-style: italic`
-- `font-weight: bold`
-- `text-decoration: underline|line-through`
-- `display: none|list-item`
-- `list-style-type: "…"` – to be used for `display:list-item` (default: `"- "`)
-- `animation:blink`
-- `content: "…"` – allowed only for pseudo selectors `::before`/`::after`
-- `@import "…"` – to import styles from css file, not supported recursive importing ⇒ can be used only in JavaScript function [style](README.md#style)
-- `tab-size: NUMBER` – all tabs will be replaced with given number of spaces (default: 2)
 
 ___
 
