@@ -229,7 +229,7 @@ function format(...messages) {
 }
 function formatWithOptions(options, ...messages) {
   const { colors: is_colors = true, is_rgb = use256Colors() } = options || {};
-  messages = apply(messages, { is_colors });
+  messages = apply(messages, { is_colors, is_rgb });
   return (0, import_node_util2.formatWithOptions)(options, ...messages);
 }
 var css = style;
