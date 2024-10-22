@@ -11,7 +11,7 @@ export function cssLine(style){
 		return [ name, css ];
 	});
 }
-export function apply(messages, { is_colors, is_stdout }){
+export function apply(messages, { is_colors, is_rgb, is_stdout }){
 	const out= [];
 	const c= "%c", cr= new RegExp(`(?<!%)(?=${c})`);
 	for(let i=0, { length }= messages; i<length; i++){
@@ -21,7 +21,7 @@ export function apply(messages, { is_colors, is_stdout }){
 		for(let j=0, { length: jl }= ms; j<jl; j++){
 			const msj= ms[j];
 			if(msj.indexOf(c)!==0) continue;
-			ms[j]= applyNth(messages[++i], { is_colors, is_stdout })(msj);
+			ms[j]= applyNth(messages[++i], { is_colors, is_rgb, is_stdout })(msj);
 		}
 		out.push(ms.join(""));
 	}
@@ -29,7 +29,7 @@ export function apply(messages, { is_colors, is_stdout }){
 }
 
 import * as counters from "./counters.js";
-function applyNth(candidate, { is_colors, is_stdout }){
+function applyNth(candidate, { is_colors, is_rgb, is_stdout }){
 	if(typeof candidate !== "string") return m=> m.slice(2);
 	if(candidate.indexOf(":")===-1) return m=> m.slice(2);
 	const filter= {};
@@ -109,7 +109,12 @@ function applyNth(candidate, { is_colors, is_stdout }){
 		}
 		if(!is_colors)
 			return out;
-		return cssAnsiReducer(out, name+":"+value);
+		if(!value.startsWith("rgb("))
+			return cssAnsiReducer(out, name+":"+value);
+		if(is_rgb)
+			return cssAnsiReducer(out, name+":rgb", value.slice(4, -1).replace(/(, *| +)/g, ";"));
+		Reflect.deleteProperty(filter, name);
+		return out;
 	}
 	function registerBeforeAndAfter(content, { type, css }){
 		content.colors[type]= css.split(";")
@@ -152,8 +157,9 @@ function testMediaAtRule(type, is_colors, is_stdout){
 	return out;
 }
 import { ansi_constants } from "./ansi_constants.js";
-function cssAnsiReducer(curr, c){
+function cssAnsiReducer(curr, c, value= ""){
+	value= [ value, "" ];
 	const a= ansi_constants[c];
-	if(a) curr.forEach((c, i)=> c.push(a[i]));
+	if(a) curr.forEach((c, i)=> c.push(a[i]+value[i]));
 	return curr;
 }
