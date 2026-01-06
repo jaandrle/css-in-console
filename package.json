@@ -1,6 +1,6 @@
 {
 	"name": "css-in-console",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "Naive and simplistic styling of terminal text using “CSS”. Provides `console.log`/… alternatives with partial `%c` support.",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
@@ -13,13 +13,8 @@
 		"url": "https://github.com/jaandrle/css-in-console/issues"
 	},
 	"scripts": {
-		"lint": "npx jshint */*.js --show-non-errors && size-limit",
-		"build:cjs": "npx esbuild index.js --platform=node --bundle --outfile=index.cjs",
-		"build:doc:typedoc": "npx typedoc index.d.ts --readme none --defaultCategory 'Internal' --categoryOrder 'Public' --categoryOrder 'Internal' --sort visibility --disableSources",
-		"build:doc:sed": "sed -i 's/^css-in-console/[← Home](..\\/..\\/..) \\| css-in-console/' docs/README.md",
-		"build:doc": "npm run build:doc:typedoc && npm run build:doc:sed",
-		"build": "clear && npm run lint && npm run build:cjs && npm run build:doc",
-		"examples": "find examples -iname '*.js' && find examples -iname '*.js' | xargs -I {} node {}"
+		"lint": "echo '\\033[33mUse `bs` (see `bs/README.md`) instead of `npm run lint`\\033[0m' && bs/lint.sh",
+		"build": "echo '\\033[33mUse `bs` (see `bs/README.md`) instead of `npm run build`\\033[0m' && bs/build.sh"
 	},
 	"keywords": [
 		"cli",
@@ -63,13 +58,13 @@
 		"maxcomplexity": 19
 	},
 	"devDependencies": {
-		"@size-limit/preset-small-lib": "^8.2.4",
-		"@types/node": "^18.14.5",
-		"esbuild": "^0.17.10",
+		"@size-limit/preset-small-lib": "^12.0",
+		"@types/node": "^18.19",
+		"esbuild": "^0.27",
 		"jshint": "^2.13.6",
-		"size-limit-node-esbuild": "^0.2.0",
-		"typedoc": "^0.23.26",
-		"typedoc-plugin-markdown": "^3.14.0"
+		"size-limit-node-esbuild": "^0.4",
+		"typedoc": "^0.28",
+		"typedoc-plugin-markdown": "^4.9"
 	},
 	"size-limit": [
 		{
