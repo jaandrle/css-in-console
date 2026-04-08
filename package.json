@@ -1,6 +1,6 @@
 {
 	"name": "css-in-console",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"description": "Naive and simplistic styling of terminal text using “CSS”. Provides `console.log`/… alternatives with partial `%c` support.",
 	"author": "Jan Andrle <andrle.jan@centrum.cz>",
 	"license": "MIT",
@@ -58,13 +58,13 @@
 		"maxcomplexity": 19
 	},
 	"devDependencies": {
-		"@size-limit/preset-small-lib": "^12.0",
+		"@size-limit/preset-small-lib": "^12.0.1",
 		"@types/node": "^18.19",
 		"esbuild": "^0.27",
-		"jshint": "^2.13.6",
+		"jshint": "^2.13",
 		"size-limit-node-esbuild": "^0.4",
-		"typedoc": "^0.28",
-		"typedoc-plugin-markdown": "^4.9"
+		"typedoc": "^0.28.18",
+		"typedoc-plugin-markdown": "^4.11"
 	},
 	"size-limit": [
 		{

@@ -6,7 +6,7 @@
 
 # Function: format()
 
-> **format**(`message?`, ...`optionalParams?`): `string`
+> **format**(`message?`, ...`optionalParams`): `string`
 
 This is extended version of [nodejs.format](../css-in-console/namespaces/nodejs/functions/format.md) whith CSS-like styling support.
 So all [nodejs.format](../css-in-console/namespaces/nodejs/functions/format.md) features supported, e. g.:
@@ -28,7 +28,7 @@ format("%cRed", "color:red");
 
 The text to print.
 
-### optionalParams?
+### optionalParams
 
 ...`any`[]
 

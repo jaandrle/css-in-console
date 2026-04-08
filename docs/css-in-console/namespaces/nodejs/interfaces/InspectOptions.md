@@ -10,7 +10,7 @@
 
 ### showHidden?
 
-> `optional` **showHidden**: `boolean`
+> `optional` **showHidden?**: `boolean`
 
 If `true`, object's non-enumerable symbols and properties are included in the formatted result.
 `WeakMap` and `WeakSet` entries are also included as well as user defined prototype properties (excluding method properties).
@@ -25,7 +25,7 @@ false
 
 ### depth?
 
-> `optional` **depth**: `number`
+> `optional` **depth?**: `number`
 
 Specifies the number of times to recurse while formatting object.
 This is useful for inspecting large objects.
@@ -41,7 +41,7 @@ To recurse up to the maximum call stack size pass `Infinity` or `null`.
 
 ### colors?
 
-> `optional` **colors**: `boolean`
+> `optional` **colors?**: `boolean`
 
 If `true`, the output is styled with ANSI color codes. Colors are customizable.
 
@@ -49,7 +49,7 @@ If `true`, the output is styled with ANSI color codes. Colors are customizable.
 
 ### customInspect?
 
-> `optional` **customInspect**: `boolean`
+> `optional` **customInspect?**: `boolean`
 
 If `false`, `[util.inspect.custom](depth, opts, inspect)` functions are not invoked.
 
@@ -63,7 +63,7 @@ true
 
 ### showProxy?
 
-> `optional` **showProxy**: `boolean`
+> `optional` **showProxy?**: `boolean`
 
 If `true`, `Proxy` inspection includes the target and handler objects.
 
@@ -77,7 +77,7 @@ false
 
 ### maxArrayLength?
 
-> `optional` **maxArrayLength**: `number`
+> `optional` **maxArrayLength?**: `number`
 
 Specifies the maximum number of `Array`, `TypedArray`, `WeakMap`, and `WeakSet` elements
 to include when formatting. Set to `null` or `Infinity` to show all elements.
@@ -93,7 +93,7 @@ Set to `0` or negative to show no elements.
 
 ### maxStringLength?
 
-> `optional` **maxStringLength**: `number`
+> `optional` **maxStringLength?**: `number`
 
 Specifies the maximum number of characters to
 include when formatting. Set to `null` or `Infinity` to show all elements.
@@ -109,7 +109,7 @@ Set to `0` or negative to show no characters.
 
 ### breakLength?
 
-> `optional` **breakLength**: `number`
+> `optional` **breakLength?**: `number`
 
 The length at which input values are split across multiple lines.
 Set to `Infinity` to format the input as a single line
@@ -125,7 +125,7 @@ Set to `Infinity` to format the input as a single line
 
 ### compact?
 
-> `optional` **compact**: `number` \| `boolean`
+> `optional` **compact?**: `number` \| `boolean`
 
 Setting this to `false` causes each object key
 to be displayed on a new line. It will also add new lines to text that is
@@ -145,7 +145,7 @@ true
 
 ### sorted?
 
-> `optional` **sorted**: `boolean` \| (`a`, `b`) => `number`
+> `optional` **sorted?**: `boolean` \| ((`a`, `b`) => `number`)
 
 If set to `true` or a function, all properties of an object, and `Set` and `Map`
 entries are sorted in the resulting string.
@@ -156,7 +156,7 @@ If set to a function, it is used as a compare function.
 
 ### getters?
 
-> `optional` **getters**: `boolean` \| `"set"` \| `"get"`
+> `optional` **getters?**: `boolean` \| `"set"` \| `"get"`
 
 If set to `true`, getters are going to be
 inspected as well. If set to `'get'` only getters without setter are going
@@ -174,7 +174,7 @@ false
 
 ### numericSeparator?
 
-> `optional` **numericSeparator**: `boolean`
+> `optional` **numericSeparator?**: `boolean`
 
 If set to `true`, an underscore is used to separate every three digits in all bigints and numbers.
 

@@ -10,10 +10,6 @@
 
 > **error**(...`data`): `void`
 
-The **`console.error()`** static method outputs a message to the console at the 'error' log level.
-
-[MDN Reference](https://developer.mozilla.org/docs/Web/API/console/error_static)
-
 ### Parameters
 
 #### data
@@ -26,7 +22,7 @@ The **`console.error()`** static method outputs a message to the console at the 
 
 ## Call Signature
 
-> **error**(`message?`, ...`optionalParams?`): `void`
+> **error**(`message?`, ...`optionalParams`): `void`
 
 Prints to `stderr` with newline. Multiple arguments can be passed, with the
 first used as the primary message and all additional used as substitution
@@ -52,7 +48,7 @@ for more information.
 
 `any`
 
-#### optionalParams?
+#### optionalParams
 
 ...`any`[]
 

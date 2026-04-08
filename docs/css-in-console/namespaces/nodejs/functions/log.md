@@ -10,10 +10,6 @@
 
 > **log**(...`data`): `void`
 
-The **`console.log()`** static method outputs a message to the console.
-
-[MDN Reference](https://developer.mozilla.org/docs/Web/API/console/log_static)
-
 ### Parameters
 
 #### data
@@ -26,7 +22,7 @@ The **`console.log()`** static method outputs a message to the console.
 
 ## Call Signature
 
-> **log**(`message?`, ...`optionalParams?`): `void`
+> **log**(`message?`, ...`optionalParams`): `void`
 
 Prints to `stdout` with newline. Multiple arguments can be passed, with the
 first used as the primary message and all additional used as substitution
@@ -49,7 +45,7 @@ See [`util.format()`](https://nodejs.org/docs/latest-v18.x/api/util.html#utilfor
 
 `any`
 
-#### optionalParams?
+#### optionalParams
 
 ...`any`[]
 

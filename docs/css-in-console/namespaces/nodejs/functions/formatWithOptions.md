@@ -6,7 +6,7 @@
 
 # Function: formatWithOptions()
 
-> **formatWithOptions**(`inspectOptions`, `format?`, ...`param?`): `string`
+> **formatWithOptions**(`inspectOptions`, `format?`, ...`param`): `string`
 
 This function is identical to [format](#formatwithoptions), except in that it takes
 an `inspectOptions` argument which specifies options that are passed along to [inspect](inspect.md).
@@ -27,7 +27,7 @@ util.formatWithOptions({ colors: true }, 'See object %O', { foo: 42 });
 
 `any`
 
-### param?
+### param
 
 ...`any`[]
 

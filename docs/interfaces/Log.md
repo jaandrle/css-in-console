@@ -6,7 +6,7 @@
 
 # Interface: Log()
 
-> **Log**(`message?`, ...`optionalParams?`): `void`
+> **Log**(`message?`, ...`optionalParams`): `void`
 
 ## Parameters
 
@@ -14,7 +14,7 @@
 
 `any`
 
-### optionalParams?
+### optionalParams
 
 ...`any`[]
 
@@ -24,7 +24,7 @@
 
 ## Public
 
-### style()
+### style
 
 > **style**: \{(...`styles`): `Record`\<`string`, `string`\>; (...`styles`): `Record`\<`string`, `string`\>; \}
 
@@ -83,7 +83,7 @@ const css= style`
 
 ***
 
-### css()
+### css
 
 > **css**: \{(...`styles`): `Record`\<`string`, `string`\>; (...`styles`): `Record`\<`string`, `string`\>; \}
 

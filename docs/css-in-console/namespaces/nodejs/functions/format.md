@@ -6,7 +6,7 @@
 
 # Function: format()
 
-> **format**(`format?`, ...`param?`): `string`
+> **format**(`format?`, ...`param`): `string`
 
 The `util.format()` method returns a formatted string using the first argument
 as a `printf`\-like format string which can contain zero or more format
@@ -58,7 +58,7 @@ event loop. Use this function with care and never in a hot code path.
 
 A `printf`-like format string.
 
-### param?
+### param
 
 ...`any`[]
 

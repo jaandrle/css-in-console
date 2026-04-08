@@ -17,3 +17,9 @@ Builds CommonJS version of the project.
 
 ### bs/build/docs.sh
 Generates docs using typedoc.
+
+### bs/npm/lint
+Linted projects’ npm dependencies.
+
+### bs/npm/update
+Updates projects’ npm dependencies.

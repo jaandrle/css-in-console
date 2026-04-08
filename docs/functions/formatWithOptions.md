@@ -6,7 +6,7 @@
 
 # Function: formatWithOptions()
 
-> **formatWithOptions**(`inspectOptions`, `format?`, ...`param?`): `string`
+> **formatWithOptions**(`inspectOptions`, `format?`, ...`param`): `string`
 
 This is extended version of [nodejs.formatWithOptions](../css-in-console/namespaces/nodejs/functions/formatWithOptions.md) whith CSS-like styling support.
 So, it is similar to [format](#formatwithoptions).
@@ -26,7 +26,7 @@ Argument which specifies options that are passed along to [nodejs.inspect](../cs
 
 `any`
 
-### param?
+### param
 
 ...`any`[]
 
