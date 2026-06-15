@@ -58,13 +58,13 @@
 		"maxcomplexity": 19
 	},
 	"devDependencies": {
-		"@size-limit/preset-small-lib": "^12.0.1",
+		"@size-limit/preset-small-lib": "^12.1",
 		"@types/node": "^18.19",
-		"esbuild": "^0.27",
+		"esbuild": "^0.28",
 		"jshint": "^2.13",
 		"size-limit-node-esbuild": "^0.4",
-		"typedoc": "^0.28.18",
-		"typedoc-plugin-markdown": "^4.11"
+		"typedoc": "^0.28.19",
+		"typedoc-plugin-markdown": "^4.12"
 	},
 	"size-limit": [
 		{
