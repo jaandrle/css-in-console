@@ -8,7 +8,7 @@
 
 > **formatWithOptions**(`inspectOptions`, `format?`, ...`param`): `string`
 
-This function is identical to [format](#formatwithoptions), except in that it takes
+This function is identical to format, except in that it takes
 an `inspectOptions` argument which specifies options that are passed along to [inspect](inspect.md).
 
 ```js

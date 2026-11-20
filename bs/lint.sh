@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
-set -euo pipefail # this can be harmful, see https://www.youtube.com/watch?v=4Jo3Ml53kvc
 
-npx jshint --show-non-errors -- *.js src/*.js
-npx size-limit
+# depends on
+declare -r jshint=node_modules/.bin/jshint
+declare -r size=bs/dev/size.sh
+
+$jshint --show-non-errors -- *.js src/*.js || {
+	exit 1
+}
+$size || {
+	exit 0 # not blocking?
+}

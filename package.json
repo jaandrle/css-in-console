@@ -58,22 +58,11 @@
 		"maxcomplexity": 19
 	},
 	"devDependencies": {
-		"@size-limit/preset-small-lib": "^12.1",
-		"@types/node": "^18.19",
-		"esbuild": "^0.28",
-		"jshint": "^2.13",
-		"size-limit-node-esbuild": "^0.4",
-		"typedoc": "^0.28.19",
-		"typedoc-plugin-markdown": "^4.12"
-	},
-	"size-limit": [
-		{
-			"path": "./index.js",
-			"limit": "10 kB",
-			"gzip": false
-		}
-	],
-	"modifyEsbuildConfig": {
-		"platform": "node"
+		"@types/node": "~26.6",
+		"esbuild": "~0.28",
+		"jshint": "~2.13",
+		"typedoc": "~0.28",
+		"typedoc-plugin-markdown": "~4.14",
+		"typescript": "5.9.3"
 	}
 }

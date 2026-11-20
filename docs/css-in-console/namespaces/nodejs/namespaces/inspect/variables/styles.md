@@ -6,4 +6,4 @@
 
 # Variable: styles
 
-> **styles**: `{ [K in Style]: string }`
+> **styles**: `InspectStyles`

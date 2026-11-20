@@ -7,5 +7,3 @@
 # Variable: replDefaults
 
 > **replDefaults**: [`InspectOptions`](../../../interfaces/InspectOptions.md)
-
-Allows changing inspect settings from the repl.

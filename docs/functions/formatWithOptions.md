@@ -9,7 +9,7 @@
 > **formatWithOptions**(`inspectOptions`, `format?`, ...`param`): `string`
 
 This is extended version of [nodejs.formatWithOptions](../css-in-console/namespaces/nodejs/functions/formatWithOptions.md) whith CSS-like styling support.
-So, it is similar to [format](#formatwithoptions).
+So, it is similar to format.
 ```js
 formatWithOptions({ colors: true }, "%cRed", "color:red");
 ```

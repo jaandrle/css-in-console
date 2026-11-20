@@ -7,5 +7,3 @@
 # Variable: custom
 
 > `const` **custom**: unique `symbol`
-
-That can be used to declare custom inspect functions.
