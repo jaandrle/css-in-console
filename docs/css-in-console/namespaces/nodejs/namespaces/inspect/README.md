@@ -8,8 +8,8 @@
 
 ## Variables
 
+- [custom](variables/custom.md)
 - [colors](variables/colors.md)
 - [styles](variables/styles.md)
 - [defaultOptions](variables/defaultOptions.md)
 - [replDefaults](variables/replDefaults.md)
-- [custom](variables/custom.md)

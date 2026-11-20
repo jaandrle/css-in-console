@@ -6,4 +6,4 @@
 
 # Variable: colors
 
-> **colors**: `NodeJS.Dict`\<\[`number`, `number`\]\>
+> **colors**: `InspectColors`

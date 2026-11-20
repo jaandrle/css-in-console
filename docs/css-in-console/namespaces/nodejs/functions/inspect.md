@@ -13,8 +13,9 @@
 The `util.inspect()` method returns a string representation of `object` that is
 intended for debugging. The output of `util.inspect` may change at any time
 and should not be depended upon programmatically. Additional `options` may be
-passed that alter the result.`util.inspect()` will use the constructor's name and/or `@@toStringTag` to make
-an identifiable tag for an inspected value.
+passed that alter the result.
+`util.inspect()` will use the constructor's name and/or `Symbol.toStringTag`
+property to make an identifiable tag for an inspected value.
 
 ```js
 class Foo {
@@ -61,7 +62,7 @@ console.log(util.inspect(util, { showHidden: true, depth: null }));
 The following example highlights the effect of the `compact` option:
 
 ```js
-import util from 'node:util';
+import { inspect } from 'node:util';
 
 const o = {
   a: [1, 2, [[
@@ -69,9 +70,9 @@ const o = {
       'eiusmod \ntempor incididunt ut labore et dolore magna aliqua.',
     'test',
     'foo']], 4],
-  b: new Map([['za', 1], ['zb', 'test']])
+  b: new Map([['za', 1], ['zb', 'test']]),
 };
-console.log(util.inspect(o, { compact: true, depth: 5, breakLength: 80 }));
+console.log(inspect(o, { compact: true, depth: 5, breakLength: 80 }));
 
 // { a:
 //   [ 1,
@@ -83,7 +84,7 @@ console.log(util.inspect(o, { compact: true, depth: 5, breakLength: 80 }));
 //   b: Map(2) { 'za' => 1, 'zb' => 'test' } }
 
 // Setting `compact` to false or an integer creates more reader friendly output.
-console.log(util.inspect(o, { compact: false, depth: 5, breakLength: 80 }));
+console.log(inspect(o, { compact: false, depth: 5, breakLength: 80 }));
 
 // {
 //   a: [
@@ -110,11 +111,10 @@ console.log(util.inspect(o, { compact: false, depth: 5, breakLength: 80 }));
 // single line.
 ```
 
-The `showHidden` option allows [`WeakMap`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap) and
-[`WeakSet`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet) entries to be
+The `showHidden` option allows `WeakMap` and `WeakSet` entries to be
 inspected. If there are more entries than `maxArrayLength`, there is no
-guarantee which entries are displayed. That means retrieving the same [`WeakSet`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet) entries twice may
-result in different output. Furthermore, entries
+guarantee which entries are displayed. That means retrieving the same
+`WeakSet` entries twice may result in different output. Furthermore, entries
 with no remaining strong references may be garbage collected at any time.
 
 ```js
@@ -138,7 +138,7 @@ import assert from 'node:assert';
 const o1 = {
   b: [2, 3, 1],
   a: '`a` comes before `b`',
-  c: new Set([2, 3, 1])
+  c: new Set([2, 3, 1]),
 };
 console.log(inspect(o1, { sorted: true }));
 // { a: '`a` comes before `b`', b: [ 2, 3, 1 ], c: Set(3) { 1, 2, 3 } }
@@ -148,11 +148,11 @@ console.log(inspect(o1, { sorted: (a, b) => b.localeCompare(a) }));
 const o2 = {
   c: new Set([2, 1, 3]),
   a: '`a` comes before `b`',
-  b: [2, 3, 1]
+  b: [2, 3, 1],
 };
 assert.strict.equal(
   inspect(o1, { sorted: true }),
-  inspect(o2, { sorted: true })
+  inspect(o2, { sorted: true }),
 );
 ```
 
@@ -162,17 +162,23 @@ numbers.
 ```js
 import { inspect } from 'node:util';
 
-const thousand = 1_000;
-const million = 1_000_000;
-const bigNumber = 123_456_789n;
-const bigDecimal = 1_234.123_45;
+const thousand = 1000;
+const million = 1000000;
+const bigNumber = 123456789n;
+const bigDecimal = 1234.12345;
 
-console.log(thousand, million, bigNumber, bigDecimal);
-// 1_000 1_000_000 123_456_789n 1_234.123_45
+console.log(inspect(thousand, { numericSeparator: true }));
+// 1_000
+console.log(inspect(million, { numericSeparator: true }));
+// 1_000_000
+console.log(inspect(bigNumber, { numericSeparator: true }));
+// 123_456_789n
+console.log(inspect(bigDecimal, { numericSeparator: true }));
+// 1_234.123_45
 ```
 
 `util.inspect()` is a synchronous method intended for debugging. Its maximum
-output length is approximately 128 MB. Inputs that result in longer output will
+output length is approximately 128 MiB. Inputs that result in longer output will
 be truncated.
 
 ### Parameters
@@ -212,8 +218,9 @@ v0.3.0
 The `util.inspect()` method returns a string representation of `object` that is
 intended for debugging. The output of `util.inspect` may change at any time
 and should not be depended upon programmatically. Additional `options` may be
-passed that alter the result.`util.inspect()` will use the constructor's name and/or `@@toStringTag` to make
-an identifiable tag for an inspected value.
+passed that alter the result.
+`util.inspect()` will use the constructor's name and/or `Symbol.toStringTag`
+property to make an identifiable tag for an inspected value.
 
 ```js
 class Foo {
@@ -260,7 +267,7 @@ console.log(util.inspect(util, { showHidden: true, depth: null }));
 The following example highlights the effect of the `compact` option:
 
 ```js
-import util from 'node:util';
+import { inspect } from 'node:util';
 
 const o = {
   a: [1, 2, [[
@@ -268,9 +275,9 @@ const o = {
       'eiusmod \ntempor incididunt ut labore et dolore magna aliqua.',
     'test',
     'foo']], 4],
-  b: new Map([['za', 1], ['zb', 'test']])
+  b: new Map([['za', 1], ['zb', 'test']]),
 };
-console.log(util.inspect(o, { compact: true, depth: 5, breakLength: 80 }));
+console.log(inspect(o, { compact: true, depth: 5, breakLength: 80 }));
 
 // { a:
 //   [ 1,
@@ -282,7 +289,7 @@ console.log(util.inspect(o, { compact: true, depth: 5, breakLength: 80 }));
 //   b: Map(2) { 'za' => 1, 'zb' => 'test' } }
 
 // Setting `compact` to false or an integer creates more reader friendly output.
-console.log(util.inspect(o, { compact: false, depth: 5, breakLength: 80 }));
+console.log(inspect(o, { compact: false, depth: 5, breakLength: 80 }));
 
 // {
 //   a: [
@@ -309,11 +316,10 @@ console.log(util.inspect(o, { compact: false, depth: 5, breakLength: 80 }));
 // single line.
 ```
 
-The `showHidden` option allows [`WeakMap`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap) and
-[`WeakSet`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet) entries to be
+The `showHidden` option allows `WeakMap` and `WeakSet` entries to be
 inspected. If there are more entries than `maxArrayLength`, there is no
-guarantee which entries are displayed. That means retrieving the same [`WeakSet`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet) entries twice may
-result in different output. Furthermore, entries
+guarantee which entries are displayed. That means retrieving the same
+`WeakSet` entries twice may result in different output. Furthermore, entries
 with no remaining strong references may be garbage collected at any time.
 
 ```js
@@ -337,7 +343,7 @@ import assert from 'node:assert';
 const o1 = {
   b: [2, 3, 1],
   a: '`a` comes before `b`',
-  c: new Set([2, 3, 1])
+  c: new Set([2, 3, 1]),
 };
 console.log(inspect(o1, { sorted: true }));
 // { a: '`a` comes before `b`', b: [ 2, 3, 1 ], c: Set(3) { 1, 2, 3 } }
@@ -347,11 +353,11 @@ console.log(inspect(o1, { sorted: (a, b) => b.localeCompare(a) }));
 const o2 = {
   c: new Set([2, 1, 3]),
   a: '`a` comes before `b`',
-  b: [2, 3, 1]
+  b: [2, 3, 1],
 };
 assert.strict.equal(
   inspect(o1, { sorted: true }),
-  inspect(o2, { sorted: true })
+  inspect(o2, { sorted: true }),
 );
 ```
 
@@ -361,17 +367,23 @@ numbers.
 ```js
 import { inspect } from 'node:util';
 
-const thousand = 1_000;
-const million = 1_000_000;
-const bigNumber = 123_456_789n;
-const bigDecimal = 1_234.123_45;
+const thousand = 1000;
+const million = 1000000;
+const bigNumber = 123456789n;
+const bigDecimal = 1234.12345;
 
-console.log(thousand, million, bigNumber, bigDecimal);
-// 1_000 1_000_000 123_456_789n 1_234.123_45
+console.log(inspect(thousand, { numericSeparator: true }));
+// 1_000
+console.log(inspect(million, { numericSeparator: true }));
+// 1_000_000
+console.log(inspect(bigNumber, { numericSeparator: true }));
+// 123_456_789n
+console.log(inspect(bigDecimal, { numericSeparator: true }));
+// 1_234.123_45
 ```
 
 `util.inspect()` is a synchronous method intended for debugging. Its maximum
-output length is approximately 128 MB. Inputs that result in longer output will
+output length is approximately 128 MiB. Inputs that result in longer output will
 be truncated.
 
 ### Parameters

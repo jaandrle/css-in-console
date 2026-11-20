@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-typedoc_params=(
+# depends on
+declare -r typedoc=node_modules/.bin/typedoc
+
+declare -r typedoc_params=(
 	 index.d.ts
 	--readme none
 	--defaultCategory 'Internal'
@@ -9,6 +12,8 @@ typedoc_params=(
 	--disableSources
 	--plugin typedoc-plugin-markdown
 )
-npx typedoc "${typedoc_params[@]}"
+$typedoc "${typedoc_params[@]}" || {
+	exit 1
+}
 # add back link
 sed -i 's/^\*\*css-in-console\*\*/[← Home](..\/..\/..)/' docs/README.md

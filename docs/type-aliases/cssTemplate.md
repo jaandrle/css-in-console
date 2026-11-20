@@ -6,6 +6,6 @@
 
 # Type Alias: cssTemplate
 
-> **cssTemplate** = \[`TemplateStringsArray`, `string`[]\]
+> **cssTemplate** = \[`css_text`: `TemplateStringsArray`, `css_vars`: `string`[]\]
 
 See [css\_rules](css_rules.md)
